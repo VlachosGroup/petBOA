@@ -5,21 +5,7 @@ import numpy as np
 import scipy.integrate as integrate
 from scipy.integrate import odeint, ode
 
-#%% Inputs for the current reaction
 species_names = ['A', 'B', 'R']
-stoichiometry = [-1, -3, 2]
-
-# Dictionaries for parameters
-para_dict_1 = {'K': 1,
-                'ksr': 1,
-                'KA': 1,
-                'KB': 1}
-
-para_dict_2 = {'k1': 1,
-                'k2': 1,
-                'alpha': 1,
-                'beta': 1}
-
 #%% Define all groups in the table as dictionaries
 # Driving force group (DFG)
 def driving_suface_reaction_controlling(concentrations, para_dict):
@@ -71,7 +57,7 @@ def temkin_pyzhev_rate(concentrations, para_dict):
     
 
 #%% ODE functions for numerical integration
-def dcdt(t, concentrations, rate_expression, stoichiometry, para_dict):
+def dcdt(t, concentrations, stoichiometry, rate_expression, para_dict):
     """Compute the derivatives
     """
     cur_rate = rate_expression(concentrations, para_dict)
@@ -102,17 +88,84 @@ def ode_solver(func, y0, t0, tf, *args):
     
     return ans
     
+
+class Reactor():
     
-#%% Test on rates given a set of concentrations
-# rate should be 1/27
-C_test = np.array([100,300,0])
-rate_1 = general_rate(C_test, para_dict_1)
-rate_2 = temkin_pyzhev_rate(C_test, para_dict_2)
+    def __init__(self, stoichiometry, P0, feed_composition, tf, name = 'simple reaction'):
+        """Initialize the constants"""
+        self.stoichiometry = stoichiometry
+        self.name = name
+        self.P0 = P0
+        self.feed_composition = feed_composition
+        self.t0 = 0
+        self.tf = tf
+        
+        self.C0 = P0 * np.array(feed_composition)/np.sum(feed_composition)
+    
+    def get_profile(self, rate_expression, para_dict):
+        """Numerical integration of the rate expression given the parameters"""
+        
+        tC_profile = ode_solver(dcdt, self.C0, self.t0, self.tf, self.stoichiometry, rate_expression, para_dict)
+        
+        return tC_profile
+        
+    def get_conversion(self, rate_expression, para_dict, species_index = 0):
+        """Get the final conversion of a specie"""
+        
+        # Get the profile
+        tC_profile = self.get_profile(rate_expression, para_dict)
+        # Extract the final concentrations
+        Cf = tC_profile[-1, species_index+1:] 
+        # Compute the final percentage conversion
+        xf = (self.C0[species_index] - Cf[species_index])/self.C0[species_index] * 100
+        
+        # Compute the final rates
+        dcdt_f = dcdt(self.tf, Cf, self.stoichiometry, rate_expression, para_dict)
+        
+        return xf, dcdt_f
+                 
+                 
+#%% Tests
+if __name__ == '__main__': 
+    
+    # Inputs for the current reaction
+    stoichiometry = [-1, -3, 2]
+    
+    # Dictionaries for parameters
+    para_dict_1 = {'K': 1,
+                    'ksr': 1,
+                    'KA': 1,
+                    'KB': 1}
+    
+    para_dict_2 = {'k1': 1,
+                    'k2': 1,
+                    'alpha': 1,
+                    'beta': 1}
 
-#%% Test on the ode solver
-C0 = np.array([100,300,0])
-t0 = 0 
-tf = 100
-
-# Numerical integration step
-ans = ode_solver(dcdt, C0, t0, tf, general_rate, stoichiometry, para_dict_1)
+    # Test on rates given a set of concentrations
+    # rate should be 1/27
+    C_test = np.array([100,300,0])
+    rate_1 = general_rate(C_test, para_dict_1)
+    rate_2 = temkin_pyzhev_rate(C_test, para_dict_2)
+    
+    # Test on the ode solver
+    P0 = 50 # atm
+    feed_composition = [1, 3, 0]
+    C0 = P0 * np.array(feed_composition)/np.sum(feed_composition)
+    t0 = 0 
+    tf = 100 # second, from V(=1 cm3) /q (=0.01 cm3/s)
+    
+    # Numerical integration step
+    ans_vec = ode_solver(dcdt, C0, t0, tf, stoichiometry, general_rate, para_dict_1)
+    Cf = ans_vec[-1, 1:] 
+    
+    # Compute the final percentage conversion
+    # Use N2 concentrations
+    xf = (C0[0] - Cf[0])/C0[0] * 100
+    
+    # Compute the final rates
+    dcdt_f = dcdt(tf, Cf, stoichiometry, general_rate, para_dict_1)
+    
+    # Test on the reactor class
+    reactor_test = Reactor(stoichiometry, P0, feed_composition, tf)
+    xf_reactor, _ = reactor_test.get_conversion(general_rate, para_dict_1)
