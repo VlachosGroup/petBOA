@@ -90,6 +90,7 @@ def ode_solver(func, y0, t0, tf, *args):
     
 
 class Reactor():
+    """Reaction ODEs class"""
     
     def __init__(self, stoichiometry, P0, feed_composition, tf, name = 'simple reaction'):
         """Initialize the constants"""
