@@ -26,24 +26,54 @@ class Estimator():
         # the dimension of inputs
         self.n_dim = len(para_names) 
         # other classes
-        self.Reactor = None
+        self.Reactors = None
         self.BOExperiment = None
         
-    def input_reactor(self, stoichiometry, P0, feed_composition, tf, x_groudtruth):
-        """Initialize a reactor"""
-        self.Reactor = Reactor(stoichiometry, P0, feed_composition, tf)
-        # Set the ground truth or experimental values
-        self.x_groudtruth = x_groudtruth
+    def input_data(self, stoichiometry, reactor_data, Y_groudtruth, Y_weights=None):
+        """Initialize n Reactor objects"""
         
-    def loss_steady_state(self, xi):
-        """Define the loss function"""
+        self.Reactors = []
+        self.n_reactors = len(reactor_data)
+        
+        # parse the reactor data and initialize Reactor objects
+        for i in range(self.n_reactors):
+            reactor_data_i = reactor_data[i]
+            Reactor_i = Reactor(stoichiometry, **reactor_data_i)
+            self.Reactors.append(Reactor_i)
+            
+        # Set the ground truth or experimental values
+        self.Y_groudtruth = Y_groudtruth
+        
+        # Set the weights for each data point
+        if Y_weights is None:
+            Y_weights = np.ones((self.n_reactors, 1))
+        self.Y_weights = Y_weights/np.sum(Y_weights)
+        
+        
+    def predict(self, xi):
+        """Predict the conversions given a set of parameters"""
+        
         para_dict = {}
         for name_i, para_i in zip(self.para_names, xi):
             para_dict.update({name_i: para_i})    
         
-        # Compute the loss, only keep the first output -conversion  
-        xf, _ = self.Reactor.get_conversion(self.rate_expression, para_dict)
-        loss = np.abs(self.x_groudtruth - xf)
+        Y_predict = np.zeros((self.n_reactors, 1))
+        
+        # Compute the first output - conversion 
+        for i in range(self.n_reactors):
+            Reactor_i = self.Reactors[i]
+            xf, _ = Reactor_i.get_conversion(self.rate_expression, para_dict)
+            Y_predict[i] = xf
+            
+        return Y_predict
+        
+    def loss_steady_state(self, xi):
+        """Define the loss function using RMSE"""
+        Y_predict = self.predict(xi)
+        
+        # Factor in the weights
+        weighted_diff = (self.Y_groudtruth - Y_predict) * self.Y_weights 
+        loss = np.linalg.norm(weighted_diff)**2/self.n_reactors
         
         return loss
     
@@ -84,79 +114,23 @@ class Estimator():
         Exp.run_trials_auto(n_iter)
         
         # Extract the optima
-        y_opt, X_opt, index_opt = Exp.get_optim()
+        loss_opt, X_opt, index_opt = Exp.get_optim()
+        
+        # Predict the Y at optima
+        Y_opt = self.predict(X_opt)
         
         if make_plot:
             # Plot the optimum discovered in each trial
             plotting.opt_per_trial_exp(Exp)
+            plotting.parity(self.Y_groudtruth, Y_opt)
         
         # Assign the experiment to self
         self.BOExperiment = Exp
 
-        return y_opt, X_opt, Exp
+        return X_opt, Y_opt, loss_opt, Exp
 
 
-#%% Tests 
 
-# Set the reaction constants
-P0 = 50 # atm
-feed_composition = [1, 3, 0]
-stoichiometry = [-1, -3, 2]
-tf = 100 # second, from V(=1 cm3) /q (=0.01 cm3/s)
+
+
     
-# Get the experimental conversion
-x_experiment = 21.20
-
-
-# Set the number of optimization loops
-n_iter = 30
-
-
-# Set the rate expression and parameter names 
-para_names_1 = ['K', 'ksr', 'KA', 'KB']
-rate_expression_1 = general_rate
-
-# Set the ranges for each parameter
-para_ranges_1 = [[0, 1], 
-                [0, 1],
-                [0, 1],
-                [0, 1]]
-
-# start a timer
-start_time = time.time()
-estimator_1 = Estimator(rate_expression_1, para_names_1, para_ranges_1)
-estimator_1.input_reactor(stoichiometry, P0, feed_composition, tf, x_experiment)
-y_opt_1, X_opt_1, Exp_1 = estimator_1.optimize(n_iter)
-end_time= time.time()
-
-# Print the results
-print('Paramter estimation takes {:.2f} min'.format((end_time-start_time)/60))
-print('Final loss {:.3f}'.format(y_opt_1))
-print('Parameters are {}'.format(X_opt_1))
-
-
-# Second rate expression and parameter names
-para_names_2 = ['k1', 'k2', 'alpha', 'beta']
-rate_expression_2 = temkin_pyzhev_rate
-# Set the ranges for each parameter
-para_ranges_2 = [[0, 1],
-                [0, 1],
-                [0, 10],
-                [0, 10]]
-# start a timer
-start_time = time.time()
-estimator_2 = Estimator(rate_expression_2, para_names_2, para_ranges_2)
-estimator_2.input_reactor(stoichiometry, P0, feed_composition, tf, x_experiment)
-y_opt_2, X_opt_2, Exp_2 = estimator_2.optimize(n_iter)
-end_time= time.time()
-
-# Print the results
-print('Paramter estimation takes {:.2f} min'.format((end_time-start_time)/60))
-print('Final loss {:.3f}'.format(y_opt_2))
-print('Parameters are {}'.format(X_opt_2))
-
-
-# Compare two models
-plotting.opt_per_trial([Exp_1.Y_real, Exp_2.Y_real], 
-                       maximize=False, 
-                       design_names = ['General', 'Temkin Pyzhev'])

@@ -6,6 +6,9 @@ import scipy.integrate as integrate
 from scipy.integrate import odeint, ode
 
 species_names = ['A', 'B', 'R']
+
+
+
 #%% Define all groups in the table as dictionaries
 # Driving force group (DFG)
 def driving_suface_reaction_controlling(concentrations, para_dict):
@@ -27,7 +30,6 @@ adsorption_groups = {'equilirium adsorption with dissociation': adsorption_equil
 
 # Exponents of adsorption groups
 exponents = {'surface reaction controlling': {'dissociation': 3}}
-
 
 #%% Define the rate expressions
 # General rate experssion
@@ -92,7 +94,7 @@ def ode_solver(func, y0, t0, tf, *args):
 class Reactor():
     """Reaction ODEs class"""
     
-    def __init__(self, stoichiometry, P0, feed_composition, tf, name = 'simple reaction'):
+    def __init__(self, stoichiometry, temperature, P0, feed_composition, tf, name = 'simple reaction'):
         """Initialize the constants"""
         self.stoichiometry = stoichiometry
         self.name = name
@@ -100,6 +102,7 @@ class Reactor():
         self.feed_composition = feed_composition
         self.t0 = 0
         self.tf = tf
+        self.temperature = temperature
         
         self.C0 = P0 * np.array(feed_composition)/np.sum(feed_composition)
     
@@ -125,48 +128,4 @@ class Reactor():
         
         return xf, dcdt_f
                  
-                 
-#%% Tests
-if __name__ == '__main__': 
-    
-    # Inputs for the current reaction
-    stoichiometry = [-1, -3, 2]
-    
-    # Dictionaries for parameters
-    para_dict_1 = {'K': 1,
-                    'ksr': 1,
-                    'KA': 1,
-                    'KB': 1}
-    
-    para_dict_2 = {'k1': 1,
-                    'k2': 1,
-                    'alpha': 1,
-                    'beta': 1}
 
-    # Test on rates given a set of concentrations
-    # rate should be 1/27
-    C_test = np.array([100,300,0])
-    rate_1 = general_rate(C_test, para_dict_1)
-    rate_2 = temkin_pyzhev_rate(C_test, para_dict_2)
-    
-    # Test on the ode solver
-    P0 = 50 # atm
-    feed_composition = [1, 3, 0]
-    C0 = P0 * np.array(feed_composition)/np.sum(feed_composition)
-    t0 = 0 
-    tf = 100 # second, from V(=1 cm3) /q (=0.01 cm3/s)
-    
-    # Numerical integration step
-    ans_vec = ode_solver(dcdt, C0, t0, tf, stoichiometry, general_rate, para_dict_1)
-    Cf = ans_vec[-1, 1:] 
-    
-    # Compute the final percentage conversion
-    # Use N2 concentrations
-    xf = (C0[0] - Cf[0])/C0[0] * 100
-    
-    # Compute the final rates
-    dcdt_f = dcdt(tf, Cf, stoichiometry, general_rate, para_dict_1)
-    
-    # Test on the reactor class
-    reactor_test = Reactor(stoichiometry, P0, feed_composition, tf)
-    xf_reactor, _ = reactor_test.get_conversion(general_rate, para_dict_1)
