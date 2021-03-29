@@ -16,7 +16,7 @@ import time
 class Estimator():
     """Parameter estimation class"""
     
-    def __init__(self, rate_expression, para_names, para_ranges, name = 'parameter_estimation'):
+    def __init__(self, rate_expression, para_names, para_ranges, name = 'estimator_0'):
         """Initialize the rate experssion and parameters"""
         
         self.rate_expression = rate_expression
