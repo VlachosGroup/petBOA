@@ -1,3 +1,4 @@
-Paramter estimation takes 0.23 min 
-Final loss 14.483 
-Parameters are [0.         1.         0.         1.93071198] 
+Parameter estimation takes 0.70 min 
+Final loss 0.224 
+Parameters are [ 0.39464843  0.35491309  0.17560203  0.16368714 -0.96396363 -0.77416873
+ -0.17427182 -0.08728313] 

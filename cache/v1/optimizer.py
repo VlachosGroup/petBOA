@@ -9,7 +9,7 @@ nextorch_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../next
 sys.path.insert(0, nextorch_path)
 
 from nextorch import plotting, bo, doe, utils, io
-from expressions import Reactor, general_rate
+from expressions import Reactor, general_rate, temkin_pyzhev_rate
 import time
 
 
@@ -107,7 +107,7 @@ class Estimator():
         X_init = doe.latin_hypercube(n_dim = self.n_dim, n_points = n_init, seed= 1)
         Y_init = bo.eval_objective_func(X_init, self.para_ranges, self.objective_func)
         # Import the initial data
-        Exp.input_data(X_init, Y_init, X_ranges = self.para_ranges, unit_flag = True)
+        Exp.input_data(X_init, Y_init, X_ranges = self.para_ranges)
         Exp.set_optim_specs(objective_func = self.objective_func, maximize =  False)
         
         # Run optimization loops        
