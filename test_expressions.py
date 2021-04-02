@@ -4,6 +4,17 @@ Tests on expressions module
 
 import numpy as np
 from expressions import Reactor, general_rate, ode_solver, dcdt
+import matplotlib.pyplot as plt
+import matplotlib
+# Set matplotlib default values
+font = {'size'   : 20}
+
+matplotlib.rc('font', **font)
+matplotlib.rcParams['axes.linewidth'] = 1.5
+matplotlib.rcParams['xtick.major.size'] = 8
+matplotlib.rcParams['xtick.major.width'] = 2
+matplotlib.rcParams['ytick.major.size'] = 8
+matplotlib.rcParams['ytick.major.width'] = 2
 
 
 # Inputs for the current reaction
@@ -45,6 +56,14 @@ dcdt_f_1 = dcdt(tf, Cf, stoichiometry, general_rate, para_dict_1)
 # xf_reactor should == xf
 reactor_test_1 = Reactor(stoichiometry, P0, feed_composition, tf)
 xf_reactor_1, _ = reactor_test_1.get_conversion(general_rate, para_dict_1)
+
+fig, ax = plt.subplots(figsize=(6,6))
+ax.plot(ans_vec[:,0], ans_vec[:,1], label = r'$\rm N_{2}$')
+ax.plot(ans_vec[:,0], ans_vec[:,2], label = r'$\rm H_{2}$')
+ax.plot(ans_vec[:,0], ans_vec[:,3], label = r'$\rm NH_{3}$')
+ax.set_xlabel('t (s)')
+ax.set_ylabel(r'$\rm P_{i}\ (atm)$')
+ax.legend()
 
 
 #%% Tests with temperature dependence

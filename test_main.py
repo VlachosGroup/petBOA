@@ -58,17 +58,17 @@ for i in range(n_reactors):
 
 #%% Parameter estimation section
 # Set the number of optimization loops
-n_iter = 30
+n_iter = 50
 
 # Set the rate expression and parameter names 
 para_names_1 = ['K', 'ksr', 'KA', 'KB']
 rate_expression = general_rate
 
 # Set the ranges for each parameter
-para_ranges_1 = [[0, 0.5], 
-                [0, 0.5],
-                [0, 0.5],
-                [0, 0.5]]
+para_ranges_1 = [[0.01, 0.5], 
+                [0.01, 0.5],
+                [0.01, 0.5],
+                [0.01, 0.5]]
 
 
 # start a timer

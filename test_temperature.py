@@ -65,19 +65,21 @@ for i in range(n_reactors):
 n_iter = 50
 
 # Set the rate expression and parameter names 
-para_names_2 = ['K_prefactor', 'ksr_prefactor', 'KA_prefactor', 'KB_prefactor', 'K_Ea', 'ksr_Ea', 'KA_Ea', 'KB_Ea']
+para_names_2 = ['K_prefactor', 'ksr_prefactor', \
+                'KA_prefactor', 'KB_prefactor', \
+                'K_Ea', 'ksr_Ea', 'KA_Ea', 'KB_Ea']
 
 rate_expression = general_rate
 
 # Set the ranges for each parameter
-para_ranges_2 = [[0, 0.5], 
-                [0, 0.5],
-                [0, 0.5],
-                [0, 0.5],
-                [-1, 0.5], 
-                [-1, 0.5], 
-                [-1, 0.5], 
-                [-1, 0.5]]
+para_ranges_2 = [[0.1, 10], 
+                [0.1, 10],
+                [0.1, 10],
+                [0.1, 10],
+                [-2, 0], 
+                [-2, 0], 
+                [-2, 0], 
+                [-2, 0]]
 
 # start a timer
 start_time = time.time()

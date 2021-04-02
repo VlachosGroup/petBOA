@@ -47,6 +47,8 @@ class Estimator():
         # Set the weights for each data point
         if Y_weights is None:
             Y_weights = np.ones((self.n_reactors, 1))
+        else:
+            Y_weights = Y_weights.reshape((self.n_reactors, 1))
         self.Y_weights = Y_weights/np.sum(Y_weights)
         
         
@@ -64,7 +66,7 @@ class Estimator():
             Reactor_i = self.Reactors[i]
             xf, _ = Reactor_i.get_conversion(self.rate_expression, para_dict)
             Y_predict[i] = xf
-            
+             
         return Y_predict
         
     def loss_steady_state(self, xi):
@@ -73,7 +75,7 @@ class Estimator():
         
         # Factor in the weights
         weighted_diff = (self.Y_groudtruth - Y_predict) * self.Y_weights 
-        loss = np.linalg.norm(weighted_diff)**2/self.n_reactors
+        loss = np.sum((weighted_diff)**2) #MSE
         
         return loss
     
