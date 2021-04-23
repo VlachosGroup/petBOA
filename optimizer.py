@@ -23,11 +23,8 @@ class Estimator():
         self.para_names = para_names
         self.para_ranges = para_ranges
         self.name = name
-        # the dimension of inputs
-        self.n_dim = len(para_names) 
         # other classes
         self.Reactors = None
-        self.BOExperiment = None
         
     def input_data(self, stoichiometry, reactor_data, Y_groudtruth, Y_weights=None):
         """Initialize n Reactor objects"""
@@ -52,7 +49,7 @@ class Estimator():
         self.Y_weights = Y_weights/np.sum(Y_weights)
         
         
-    def predict(self, xi):
+    def predict(self, xi, make_plot = False):
         """Predict the conversions given a set of parameters"""
         
         para_dict = {}
@@ -66,7 +63,10 @@ class Estimator():
             Reactor_i = self.Reactors[i]
             xf, _ = Reactor_i.get_conversion(self.rate_expression, para_dict)
             Y_predict[i] = xf
-             
+        
+        if make_plot:
+            plotting.parity(self.Y_groudtruth, Y_predict)
+
         return Y_predict
         
     def loss_steady_state(self, xi):
@@ -97,20 +97,38 @@ class Estimator():
         Y_real = np.expand_dims(Y_real, axis=1)
             
         return Y_real 
-    
-    def optimize(self, n_iter, make_plot = True):
-        """Train a Bayesian Optimizer
+
+        
+class BOOptimizer():
+    """
+    Automated BO Optimizer
+    """
+    def __init__(self, name = 'optimizer_0'):
+        self.name = name
+        
+    def optimize(self, 
+                 objective_func, 
+                 para_ranges, 
+                 maximize, 
+                 n_iter = 100, 
+                 make_plot = True):
+        """
+        Train a Bayesian Optimizer
         """
         # Initialize a BO experiment
         Exp = bo.Experiment(self.name)
         
+        # the dimension of inputs
+        n_dim = len(para_ranges)
+        
         # Latin hypercube design with 10 initial points
-        n_init = 5 * self.n_dim
-        X_init = doe.latin_hypercube(n_dim = self.n_dim, n_points = n_init, seed= 1)
-        Y_init = bo.eval_objective_func(X_init, self.para_ranges, self.objective_func)
+        n_init = 5 * n_dim
+        X_init = doe.latin_hypercube(n_dim = n_dim, n_points = n_init, seed= 1)
+        Y_init = bo.eval_objective_func(X_init, para_ranges, objective_func)
+        
         # Import the initial data
-        Exp.input_data(X_init, Y_init, X_ranges = self.para_ranges, unit_flag = True)
-        Exp.set_optim_specs(objective_func = self.objective_func, maximize =  False)
+        Exp.input_data(X_init, Y_init, X_ranges=para_ranges, unit_flag=True)
+        Exp.set_optim_specs(objective_func=objective_func, maximize=maximize)
         
         # Run optimization loops        
         Exp.run_trials_auto(n_iter)
@@ -119,16 +137,12 @@ class Estimator():
         loss_opt, X_opt, index_opt = Exp.get_optim()
         
         # Predict the Y at optima
-        Y_opt = self.predict(X_opt)
+        Y_opt = objective_func(X_opt)
         
         if make_plot:
             # Plot the optimum discovered in each trial
             plotting.opt_per_trial_exp(Exp)
-            plotting.parity(self.Y_groudtruth, Y_opt)
         
-        # Assign the experiment to self
-        self.BOExperiment = Exp
-
         return X_opt, Y_opt, loss_opt, Exp
 
 
