@@ -174,3 +174,42 @@ ax.scatter(time,data[:,5])
 ax.scatter(time,data[:,6])        
 
 plt.show()
+
+
+
+def get_rate(y, p):
+    #set Kp values
+    Kp_EDH = p[7]
+    Kp_Hyd = p[8]
+    Kp_RWGS = p[9]
+    
+    #Calculate Qp values
+    #Qp is ratio of pressures, to calculate pressure assume ideal gas law
+    #P = Conc*RT
+    #Assume standard pressure of P0 is 1 atm
+    
+    # p[6] is temperature 
+    if y[0]!=0:
+        Qp_EDH = ((y[1]*R_bar*p[6])*(y[3]*R_bar*p[6]))/(y[0]*R_bar*p[6])
+    else:
+        Qp_EDH = 0
+    if y[0]!=0 and y[3]!=0:
+        Qp_Hyd = ((y[2]*R_bar*p[6])*(y[2]*R_bar*p[6]))/((y[0]*R_bar*p[6])*(y[3]*R_bar*p[6]))
+    else:
+        Qp_Hyd = 0
+    if y[3]!=0 and y[4]!=0:
+        Qp_RWGS = ((y[5]*R_bar*p[6])*(y[6]*R_bar*p[6]))/((y[3]*R_bar*p[6])*(y[4]*R_bar*p[6]))
+    else:
+        Qp_RWGS = 0
+    
+    #Calculate rate values
+    rate_net_EDH = (p[0]*np.exp(-p[1]/(R*p[6]))*y[0])*(1-(Qp_EDH/Kp_EDH))
+    rate_net_Hyd = (p[2]*np.exp(-p[3]/(R*p[6]))*y[0]*y[3])*(1-(Qp_Hyd/Kp_Hyd))
+    rate_net_RWGS = (p[4]*np.exp(-p[5]/(R*p[6]))*y[3]*y[4])*(1-(Qp_RWGS/Kp_RWGS))
+    
+    return rate_net_EDH, Qp_EDH, rate_net_Hyd, Qp_Hyd, rate_net_RWGS, Qp_RWGS
+
+y_test = [1, 2, 3, 4, 5, 6, 7]
+
+rates = get_rate(y_test, p)
+print(rates)

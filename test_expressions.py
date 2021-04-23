@@ -3,7 +3,9 @@ Tests on expressions module
 """
 
 import numpy as np
-from expressions import Reactor, general_rate, ode_solver, dcdt
+from reactor import Reactor, ode_solver, ode_solver_ivp, dcdt
+from expressions import general_rate
+
 import matplotlib.pyplot as plt
 import matplotlib
 # Set matplotlib default values
@@ -43,7 +45,10 @@ rate_1 = general_rate(C_test, para_dict_1)
 
 # Numerical integration step
 ans_vec = ode_solver(dcdt, C0, t0, tf, stoichiometry, general_rate, para_dict_1)
-Cf = ans_vec[-1, 1:] 
+ans_vec_ivp = ode_solver_ivp(dcdt, C0, t0, tf, None, 'LSODA', stoichiometry, general_rate, para_dict_1)
+
+Cf = ans_vec_ivp[-1, 1:] 
+#Cf = ans_vec
 
 # Compute the final percentage conversion
 # Use N2 concentrations
@@ -51,6 +56,7 @@ xf_1 = (C0[0] - Cf[0])/C0[0] * 100
 
 # Compute the final rates
 dcdt_f_1 = dcdt(tf, Cf, stoichiometry, general_rate, para_dict_1)
+#dcdt_f_1_m = dcdt_m(tf, Cf, stoichiometry, general_rate, para_dict_1)
 
 # Test on the reactor class
 # xf_reactor should == xf
@@ -81,7 +87,7 @@ rate_2 = general_rate(C_test, para_dict_2, temperature)
 
 # Test on the ode solver
 # Numerical integration step
-ans_vec = ode_solver(dcdt, C0, t0, tf, stoichiometry, general_rate, para_dict_2, temperature)
+ans_vec = ode_solver_ivp(dcdt, C0, t0, tf, None, 'LSODA',stoichiometry, general_rate, para_dict_2, temperature)
 Cf = ans_vec[-1, 1:] 
 
 # Compute the final percentage conversion

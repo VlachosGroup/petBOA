@@ -22,6 +22,7 @@ A0_EDH = 2.5E6
 Ea_EDH = 125 #kJ/mol
 A0_Hyd = 3.8E8
 Ea_Hyd = 110 #kJ/mol
+A0_RWGS = 1.9E6
 Ea_RWGS = 70 #kJ/mol
 T = 873 #K, note: only works for temperatures of 835, 848, 861, and 873K
                  #if a different temperature is desired, add the Kp values
