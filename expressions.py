@@ -91,7 +91,7 @@ exponents = {'surface reaction controlling': {'dissociation': 3},
 
 #%% Define the rate expressions
 # General rate experssion
-def general_rate(concentrations, para_dict, temperature=None):
+def general_rate(concentrations, para_dict, stoichiometry=None, name=None, temperature=None):
     """Rate expressions from Yang and Hougen
     """
     controling_key = 'surface reaction controlling'
@@ -106,7 +106,7 @@ def general_rate(concentrations, para_dict, temperature=None):
     
     return rate
 
-def general_rate_ads(concentrations, para_dict, temperature=None):
+def general_rate_ads(concentrations, para_dict, stoichiometry=None, name=None, temperature=None):
     """Rate expressions from Yang and Hougen
     """
     controling_key = 'adsorption controlling'

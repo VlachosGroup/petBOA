@@ -60,7 +60,7 @@ dcdt_f_1 = dcdt(tf, Cf, stoichiometry, general_rate, para_dict_1)
 
 # Test on the reactor class
 # xf_reactor should == xf
-reactor_test_1 = Reactor(stoichiometry, P0, feed_composition, tf)
+reactor_test_1 = Reactor(stoichiometry, tf, P0, feed_composition)
 xf_reactor_1, _ = reactor_test_1.get_conversion(general_rate, para_dict_1)
 
 fig, ax = plt.subplots(figsize=(6,6))
@@ -83,11 +83,11 @@ para_dict_2 = {'K_prefactor': 1,
                 'KB_Ea': -3}
 
 temperature = 100 #K
-rate_2 = general_rate(C_test, para_dict_2, temperature)
+rate_2 = general_rate(C_test, para_dict_2, stoichiometry=stoichiometry, temperature=temperature)
 
 # Test on the ode solver
 # Numerical integration step
-ans_vec = ode_solver_ivp(dcdt, C0, t0, tf, None, 'LSODA',stoichiometry, general_rate, para_dict_2, temperature)
+ans_vec = ode_solver_ivp(dcdt, C0, t0, tf, None, 'LSODA',stoichiometry, general_rate, para_dict_2, None, temperature)
 Cf = ans_vec[-1, 1:] 
 
 # Compute the final percentage conversion
@@ -95,11 +95,11 @@ Cf = ans_vec[-1, 1:]
 xf_2 = (C0[0] - Cf[0])/C0[0] * 100
 
 # Compute the final rates
-dcdt_f_2 = dcdt(tf, Cf, stoichiometry, general_rate, para_dict_2, temperature)
+dcdt_f_2 = dcdt(tf, Cf, stoichiometry, general_rate, para_dict_2, None, temperature)
 
 # Test on the reactor class
 # xf_reactor should == xf
-reactor_test_2 = Reactor(stoichiometry, P0, feed_composition, tf, temperature=temperature)
+reactor_test_2 = Reactor(stoichiometry, tf, P0, feed_composition, temperature=temperature)
 xf_reactor_2, _ = reactor_test_2.get_conversion(general_rate, para_dict_2)
 
 

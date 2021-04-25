@@ -5,8 +5,9 @@ import pandas as pd
 import numpy as np
 import time
 
-from optimizer import Estimator
-from expressions import Reactor, general_rate
+from optimizer import ModelBridge, BOOptimizer
+from expressions import  general_rate
+from reactor import Reactor
 from nextorch import plotting, bo, doe, utils, io
 
 
@@ -83,13 +84,22 @@ para_ranges_2 = [[0.1, 10],
 
 # start a timer
 start_time = time.time()
-estimator = Estimator(rate_expression, para_names_2, para_ranges_2, name = 'rate_2')
-estimator.input_data(stoichiometry, reactor_data, Y_experiments, Y_weights)
-X_opt, Y_opt, loss_opt, Exp = estimator.optimize(n_iter)
+
+# Input experimental data and models (rate expressions) into a model bridge
+bridge = ModelBridge(rate_expression, para_names_2, name = 'rate_2')
+bridge.input_data(stoichiometry, reactor_data, Y_experiments, Y_weights)
+
+# set up an optimzer 
+optimizer = BOOptimizer()
+X_opt, loss_opt, Exp = optimizer.optimize(bridge.loss_func, para_ranges_2, n_iter)
 end_time= time.time()
 
+# Predict the conversions given the optimal set of paraemeters
+Y_opt = bridge.conversion_steady_state(X_opt)
+plotting.parity(Y_opt, Y_experiments)
+
 # Print the results
-file = open(estimator.name + ".txt","w")
+file = open(bridge.name + ".txt","w")
 file.write('Parameter estimation takes {:.2f} min \n'.format((end_time-start_time)/60))
 file.write('Final loss {:.3f} \n'.format(loss_opt))
 file.write('Parameters are {} \n'.format(X_opt))
