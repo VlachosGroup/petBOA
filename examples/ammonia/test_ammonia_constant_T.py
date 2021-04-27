@@ -1,14 +1,20 @@
 """
 The main testing file for BO and expressions
 """
+import os
+import sys
+
+project_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
+sys.path.insert(0, project_path)
+
 import pandas as pd
 import numpy as np
 import time
 
-from optimizer import ModelBridge, BOOptimizer
-from expressions import  general_rate
-from reactor import Reactor
-from nextorch import plotting, bo, doe, utils, io
+from nextorch import plotting
+from estimator.optimizer import ModelBridge, BOOptimizer
+from estimator.expressions import  general_rate
+from estimator.reactor import Reactor
 
 #%% Import and process data
 # Set the reaction constants

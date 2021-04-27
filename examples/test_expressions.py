@@ -2,9 +2,15 @@
 Tests on expressions module
 """
 
+import os
+import sys
+
+project_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, project_path)
+
 import numpy as np
-from reactor import Reactor, ode_solver, ode_solver_ivp, dcdt
-from expressions import general_rate
+from estimator.reactor import Reactor, ode_solver, ode_solver_ivp, dcdt
+from estimator.expressions import general_rate
 
 import matplotlib.pyplot as plt
 import matplotlib
@@ -70,7 +76,6 @@ ax.plot(ans_vec[:,0], ans_vec[:,3], label = r'$\rm NH_{3}$')
 ax.set_xlabel('t (s)')
 ax.set_ylabel(r'$\rm P_{i}\ (atm)$')
 ax.legend()
-
 
 #%% Tests with temperature dependence
 para_dict_2 = {'K_prefactor': 1,

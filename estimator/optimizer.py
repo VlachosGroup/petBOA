@@ -5,13 +5,11 @@ import os
 import sys
 import numpy as np
 
-nextorch_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../nextorch/'))
-sys.path.insert(0, nextorch_path)
 
 from nextorch import plotting, bo, doe, utils, io
-from expressions import general_rate
-from reactor import Reactor
-from utils import WeightedRMSE
+from estimator.expressions import general_rate
+from estimator.reactor import Reactor
+from estimator.utils import WeightedRMSE
 
 import time
 

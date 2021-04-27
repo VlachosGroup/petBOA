@@ -4,7 +4,6 @@ Utility functions
 
 import numpy as np
 
-
 # Loss functions
 # reference: https://ml-cheatsheet.readthedocs.io/en/latest/loss_functions.html
 def RMSE(yHat, y):
