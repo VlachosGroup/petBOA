@@ -4,7 +4,7 @@ Optimizer functions for parameter estimation
 import os
 import sys
 import numpy as np
-
+import copy
 
 from nextorch import plotting, bo, doe, utils, io
 from estimator.expressions import general_rate
@@ -26,6 +26,7 @@ class ModelBridge():
         
         # other classes
         self.Reactors = None
+        
         
     def input_data(self, stoichiometry, reactor_data, Y_groudtruth, Y_weights=None, t_eval=None, eval_profile=False, method='LSODA'):
         """Initialize n Reactor objects"""
@@ -67,7 +68,7 @@ class ModelBridge():
         self.Y_weights = Y_weights/np.sum(Y_weights)
         
         
-    def conversion_steady_state(self, xi):
+    def conversion(self, xi):
         """Predict the conversions given a set of parameters"""
         
         para_dict = {}
@@ -109,7 +110,7 @@ class ModelBridge():
     
     def loss_steady_state(self, xi):
         """Define the loss function using RMSE"""
-        Y_predict = self.conversion_steady_state(xi)
+        Y_predict = self.conversion(xi)
         
         # Factor in the weights
         loss =  WeightedRMSE(self.Y_groudtruth, Y_predict, self.Y_weights)
@@ -120,7 +121,6 @@ class ModelBridge():
     
     
     def loss_profile(self, xi):
-        
         """Define the loss function using RMSE"""
         _, Y_predict = self.profile(xi)
         
@@ -132,7 +132,7 @@ class ModelBridge():
         return loss
 
     def loss_func(self, xi):
-
+        """Generic loss function"""
         if self.eval_profile:
             return self.loss_profile(xi)
         
@@ -141,13 +141,65 @@ class ModelBridge():
         
 
 
-#%% BO Optimizer functions    
+#%% BO Optimizer functions 
+class ParameterMask():
+
+    def __init__(self, para_ranges):
+        
+        # the dimension of inputs
+        self.n_dim = len(para_ranges)
+        
+        self.i_varing = []
+        self.para_ranges_varying = []
+        self.para_fixed_values = []
+        
+        # Count the number of fixed inputs
+        for pi, para_range_i in enumerate(para_ranges):
+            if isinstance(para_range_i, list):
+                self.para_ranges_varying.append(para_range_i)
+                self.i_varing.append(pi)
+            else:
+                self.para_fixed_values.append(para_range_i)
+    
+    
+    def prepare_X(self, X):
+        
+        #If 1D, make it 2D a matrix
+        X_temp = copy.deepcopy(np.array(X))
+        if len(X_temp.shape)<2:
+            X_temp = np.expand_dims(X_temp, axis=0) #If 1D, make it 2D array
+    
+        n_points = X_temp.shape[0]
+        self.X_temp = X_temp
+        xi_list = [] # a list of the columns
+        di_fixed = 0 # index for fixed value dimensions
+        di_varying = 0 # index for varying x dimensions
+    
+        for di in range(self.n_dim):
+            # Get a column from X_test
+            if di in self.i_varing:
+                xi = X_temp[:, di_varying]
+                di_varying += 1
+            # Create a column of fix values
+            else:
+                fix_value_i = self.para_fixed_values[di_fixed]
+                xi = np.ones((n_points, 1)) * fix_value_i
+                di_fixed += 1
+    
+            xi_list.append(xi)
+        # Stack the columns into a matrix
+        X_full = np.column_stack(xi_list)
+        
+        return X_full
+            
+    
 class VectorizedFunc():
     """
     Wrapper for the objective function
     """
     def __init__(self, objective_func):
         self.objective_func = objective_func
+        
         
     def predict(self, X_real):
         """
@@ -168,6 +220,36 @@ class VectorizedFunc():
             
         return Y_real 
 
+
+class MaskedFunc(VectorizedFunc):
+    
+    def __init__(self, objective_func, para_ranges):
+        super().__init__(objective_func)
+        
+        self.mask = ParameterMask(para_ranges)
+        
+        
+    def predict(self, X_real):
+        """
+        vectorized objective function object
+        Input/output matrices
+        """
+        if len(X_real.shape) < 2:
+            X_real = np.expand_dims(X_real, axis=1) #If 1D, make it 2D array
+            
+        Y_real = []
+        for i, xi in enumerate(X_real):
+            xi_full = self.mask(xi)
+            yi = self.objective_func(xi_full)    
+            Y_real.append(yi)
+                
+        Y_real = np.array(Y_real)
+        # Put y in a column
+        Y_real = np.expand_dims(Y_real, axis=1)
+            
+        return Y_real 
+        
+        
         
 class BOOptimizer():
     """
