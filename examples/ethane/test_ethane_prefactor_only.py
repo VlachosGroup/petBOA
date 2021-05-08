@@ -26,7 +26,7 @@ matplotlib.rcParams['xtick.major.size'] = 8
 matplotlib.rcParams['xtick.major.width'] = 2
 matplotlib.rcParams['ytick.major.size'] = 8
 matplotlib.rcParams['ytick.major.width'] = 2
-
+matplotlib.rcParams['figure.dpi'] = 300
 
 def plot_ethane(t_vec, C_profile, title=None, save_path=None):
     """
@@ -172,8 +172,9 @@ para_name_ethane = list(para_ethane.keys())
 para_ground_truth = list(para_ethane.values())
 
 # Estimator name
-estimator_name = 'ethane'
+estimator_name = 'ethane_prefactor_only'
 ut.clear_cache(estimator_name)
+
 
 def rate_eq(concentrations, para_dict, stoichiometry, name, temperature):
     """
@@ -208,21 +209,18 @@ def rate_eq(concentrations, para_dict, stoichiometry, name, temperature):
         
     return rate_value
 
-#%% Tests on the ethane system, with no noise
-# Test on whether the rate can be calculated correctly
-rate_EDH = rate_eq(C0, para_ethane, stoichiometry[0],  'EDH', temperature)
-rate_Hyd = rate_eq(C0, para_ethane, stoichiometry[1], 'Hyd', temperature)
-rate_RWGS = rate_eq(C0, para_ethane, stoichiometry[2],'RWGS',  temperature)
 
-
+#%%
 # Test on a reactor model to perform integration 
 reactor_ethane = Reactor(stoichiometry, tf, C0=C0, names=rxn_names, temperature=temperature)
 tC_profile = reactor_ethane.get_profile(rate_eq, para_ethane, t_eval=t_eval)
 # Plot the profile
 t_eval = tC_profile[:, 0]
 C_profile = tC_profile[:, 1:]
+# Plot the profile
+t_eval = tC_profile[:, 0]
+C_profile = tC_profile[:, 1:]
 plot_ethane(t_eval, C_profile, 'Ground truth', estimator_name)
-
 
 # Test the model bridge
 # Prase the specifics (reaction conditions) of reactor object into a dictionary
@@ -242,26 +240,21 @@ Y_weights = np.ones((n_reactor,m_specs))
 Y_weights[:,-1] = 0 
 
 # Input experimental data and models (rate expressions) into a model bridge
-bridge = ModelBridge(rate_eq, para_name_ethane, name=estimator_name)
+bridge = ModelBridge(rate_eq, para_name_ethane, name = estimator_name)
 bridge.input_data(stoichiometry, reactor_data, Y_experiments, Y_weights, t_eval=t_eval, eval_profile=True)
-
-# Test the bridge on a set of 1s
-para_set_1 = np.ones(len(para_name_ethane))
-t_vec_predict, Y_predict = bridge.profile(para_set_1)
-loss_1 = bridge.loss_func(para_set_1)
-plot_ethane(t_vec_predict[0], Y_predict[0], 'Set of 1s', estimator_name)
-
-# Test the bridge on ground truth parameters, the loss should be 0
-t_vec_predict, Y_predict = bridge.profile(para_ground_truth)
-loss_ground_truth = bridge.loss_func(para_ground_truth)
-plot_ethane_overlap(t_vec_predict[0], Y_predict[0], t_eval, C_profile, 'Ground truth', estimator_name)
-
 
 # Set up an optimizer 
 # Automatically compute the parameter ranges given a deviation
 deviation = 0.25
-para_ranges =  [[-np.abs(vi) *deviation + vi, np.abs(vi) *deviation + vi] for vi in para_ethane.values()]
+varying_axes = [0, 3, 6]
 
+para_ranges = []
+for i, vi in enumerate(para_ethane.values()):
+    if i in varying_axes:
+        para_ranges.append([-np.abs(vi) *deviation + vi, np.abs(vi) *deviation + vi])
+    else: 
+        para_ranges.append(vi)
+        
 # Start a timer
 start_time = time.time()
 n_iter = 100
@@ -271,53 +264,8 @@ end_time= time.time()
 
 # Predict the conversions given the optimal set of parameters
 t_opt, Y_opt = bridge.profile(X_opt)
-plot_ethane_overlap(t_opt[0], Y_opt[0], t_eval, C_profile,'Optimal Set', estimator_name)
-
-# Check the left and right bounds without optimization
-para_left = [vi[0] for vi in para_ranges]
-para_right = [vi[1] for vi in para_ranges]
-
-t_left, Y_left = bridge.profile(para_left)
-loss_left = bridge.loss_func(para_left)
-plot_ethane_overlap(t_left[0], Y_left[0],t_eval, C_profile, 'Left bound', estimator_name)
-
-t_right, Y_right = bridge.profile(para_right)
-loss_right = bridge.loss_func(para_right)
-plot_ethane_overlap(t_right[0], Y_right[0], t_eval, C_profile,'Right bound', estimator_name)
-
+plot_ethane_overlap(t_opt[0], Y_opt[0], t_eval, C_profile,'Optimal Set Prefactor Only', estimator_name)
 
 # Print the results
 ut.write_results(estimator_name, start_time, end_time, loss_opt, X_opt)
 
-#%% Test on the ethane system, with noise
-# Add to noise to the concentrations
-estimator_name = 'ethane_noisy'
-ut.clear_cache(estimator_name)
-
-noise_level = 0.00003
-noise_matrix = np.random.normal(loc=0,scale=noise_level, size=C_profile.shape)
-C_profile_noisy = noise_matrix + C_profile
-plot_ethane_overlap(t_eval, C_profile_noisy, t_eval, C_profile, 'Noisy Data', estimator_name)
-
-# Update the experimental data
-Y_experiments_noisy = [C_profile_noisy]
-
-# Construct a ModelBridge object
-bridge_noisy = ModelBridge(rate_eq, para_name_ethane, name = estimator_name)
-bridge_noisy.input_data(stoichiometry, reactor_data, Y_experiments_noisy, Y_weights, t_eval=t_eval, eval_profile=True)
-
-# Perform the optimization
-start_time = time.time()
-n_iter = 100
-optimizer_noisy = BOOptimizer(estimator_name)
-X_opt_noisy, loss_opt_noisy, Exp_noisy = optimizer_noisy.optimize(bridge_noisy.loss_func, para_ranges, n_iter, log_flag=True)
-end_time= time.time()
-
-
-# Predict the conversions given the optimal set of parameters
-t_opt_noisy, Y_opt_noisy = bridge_noisy.profile(X_opt_noisy)
-plot_ethane_overlap(t_opt_noisy[0], Y_opt_noisy[0], t_eval, C_profile, 'Optimal Set for noisy data', estimator_name)
-
-
-# Print the results
-ut.write_results(estimator_name, start_time, end_time, loss_opt, X_opt)

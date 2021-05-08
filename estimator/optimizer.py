@@ -108,7 +108,7 @@ class ModelBridge():
         return t_predict, Y_predict
         
     
-    def loss_steady_state(self, xi):
+    def loss_conversion(self, xi):
         """Define the loss function using RMSE"""
         Y_predict = self.conversion(xi)
         
@@ -136,20 +136,24 @@ class ModelBridge():
         if self.eval_profile:
             return self.loss_profile(xi)
         
-        return self.loss_steady_state(xi)
+        return self.loss_conversion(xi)
         
         
 
 
 #%% BO Optimizer functions 
-class ParameterMask():
 
-    def __init__(self, para_ranges):
+class ParameterMask():
+    """Create full X matrix with fixed values and varying values"""
+    def __init__(self, para_ranges, return_1d=True):
+        
+        # set the return dimension
+        self.return_1d = return_1d
         
         # the dimension of inputs
         self.n_dim = len(para_ranges)
         
-        self.i_varing = []
+        self.varying_axes = []
         self.para_ranges_varying = []
         self.para_fixed_values = []
         
@@ -157,13 +161,13 @@ class ParameterMask():
         for pi, para_range_i in enumerate(para_ranges):
             if isinstance(para_range_i, list):
                 self.para_ranges_varying.append(para_range_i)
-                self.i_varing.append(pi)
+                self.varying_axes.append(pi)
             else:
                 self.para_fixed_values.append(para_range_i)
     
     
     def prepare_X(self, X):
-        
+        """Prepare the full X vector"""
         #If 1D, make it 2D a matrix
         X_temp = copy.deepcopy(np.array(X))
         if len(X_temp.shape)<2:
@@ -177,7 +181,7 @@ class ParameterMask():
     
         for di in range(self.n_dim):
             # Get a column from X_test
-            if di in self.i_varing:
+            if di in self.varying_axes:
                 xi = X_temp[:, di_varying]
                 di_varying += 1
             # Create a column of fix values
@@ -190,12 +194,15 @@ class ParameterMask():
         # Stack the columns into a matrix
         X_full = np.column_stack(xi_list)
         
+        if self.return_1d:
+            X_full = np.squeeze(X_full, axis = 0)
+        
         return X_full
             
     
 class VectorizedFunc():
     """
-    Wrapper for the objective function
+    Wrapper for the vectorized objective function
     """
     def __init__(self, objective_func):
         self.objective_func = objective_func
@@ -222,7 +229,9 @@ class VectorizedFunc():
 
 
 class MaskedFunc(VectorizedFunc):
-    
+    """
+    Wrapper for the objective function with fixed and varying inputs
+    """
     def __init__(self, objective_func, para_ranges):
         super().__init__(objective_func)
         
@@ -231,7 +240,7 @@ class MaskedFunc(VectorizedFunc):
         
     def predict(self, X_real):
         """
-        vectorized objective function object
+        vectorized objective function object with fixed and varying inputs
         Input/output matrices
         """
         if len(X_real.shape) < 2:
@@ -239,7 +248,8 @@ class MaskedFunc(VectorizedFunc):
             
         Y_real = []
         for i, xi in enumerate(X_real):
-            xi_full = self.mask(xi)
+            xi_full = self.mask.prepare_X(xi)
+            #print(xi_full)
             yi = self.objective_func(xi_full)    
             Y_real.append(yi)
                 
@@ -268,21 +278,24 @@ class BOOptimizer():
         Train a Bayesian Optimizer
         """
         # Vectorize the objective function
-        objective_func_vectorized = VectorizedFunc(objective_func)
+        objective_func_vectorized = MaskedFunc(objective_func, para_ranges)
+        para_ranges_varying = objective_func_vectorized.mask.para_ranges_varying
         
         # Initialize a BO experiment
         Exp = bo.Experiment(self.name)
         
         # the dimension of inputs
-        n_dim = len(para_ranges)
+        n_dim = len(para_ranges_varying)
         
         # Latin hypercube design with 10 initial points
         n_init = 5 * n_dim
         X_init = doe.latin_hypercube(n_dim = n_dim, n_points = n_init, seed= 1)
-        Y_init = bo.eval_objective_func(X_init, para_ranges, objective_func_vectorized.predict)
+        
+        #print(X_init)
+        Y_init = bo.eval_objective_func(X_init, para_ranges_varying, objective_func_vectorized.predict)
         
         # Import the initial data
-        Exp.input_data(X_init, Y_init, X_ranges=para_ranges, unit_flag=True)
+        Exp.input_data(X_init, Y_init, X_ranges=para_ranges_varying, unit_flag=True)
         Exp.set_optim_specs(objective_func=objective_func_vectorized.predict, maximize=False)
         
         # Run optimization loops        
@@ -291,11 +304,14 @@ class BOOptimizer():
         # Extract the optima
         y_opt, X_opt, index_opt = Exp.get_optim()
         
+        # Expand the X into the full size
+        X_opt_full = objective_func_vectorized.mask.prepare_X(X_opt)
+        
         if make_plot:
             # Plot the optimum discovered in each trial
-            plotting.opt_per_trial_exp(Exp, log_flag=log_flag)
+            plotting.opt_per_trial_exp(Exp, log_flag=log_flag, save_fig=True)
 
-        return X_opt, y_opt, Exp
+        return X_opt_full, y_opt, Exp
         
         
         
