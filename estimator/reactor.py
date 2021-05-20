@@ -133,13 +133,24 @@ class Reactor():
         
         return tC_profile
     
+    def get_exit_concentration(self, rate_expressions, para_dict, t_eval=None, method='LSODA'):
+        """Get the exit concentration of a specie"""
+        
+        # Get the profile
+        tC_profile = self.get_profile(rate_expressions, para_dict, t_eval, method)
+
+        # Extract the final concentrations by taking out the time 
+        Cf = tC_profile[-1, 1:] 
+        
+        return Cf
+
+
     def get_conversion(self, rate_expressions, para_dict, species_index = 0, t_eval=None, method='LSODA'):
         """Get the final conversion of a specie"""
         
         # Get the profile
-        tC_profile = self.get_profile(rate_expressions, para_dict, t_eval, method)
-        # Extract the final concentrations
-        Cf = tC_profile[-1, species_index+1:] 
+        Cf = self.get_exit_concentration(rate_expressions, para_dict, t_eval, method)
+        
         # Compute the final percentage conversion
         xf = (self.C0[species_index] - Cf[species_index])/self.C0[species_index] * 100
         
@@ -148,4 +159,3 @@ class Reactor():
         
         return xf, dcdt_f
     
-                 

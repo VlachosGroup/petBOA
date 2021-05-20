@@ -13,6 +13,7 @@ from estimator.utils import WeightedRMSE
 
 import time
 
+qoi_choices = ['profile', 'conversion', 'concentration']
 
 class ModelBridge():
     """Parameter estimation class"""
@@ -28,7 +29,17 @@ class ModelBridge():
         self.Reactors = None
         
         
-    def input_data(self, stoichiometry, reactor_data, Y_groudtruth, Y_weights=None, t_eval=None, eval_profile=False, method='LSODA'):
+    def input_data(
+        self, 
+        stoichiometry, 
+        reactor_data, 
+        Y_groudtruth, 
+        Y_weights=None, 
+        t_eval=None, 
+        qoi='profile', 
+        species_index = 0,
+        method='LSODA'):
+
         """Initialize n Reactor objects"""
         
         # stoichiometry matrix is in the shape of n_rxn * m_spec
@@ -47,7 +58,6 @@ class ModelBridge():
         # evaluate profile parameters
         self.t_eval = t_eval
         self.method = method
-        self.eval_profile = eval_profile
     
         # parse the reactor data and initialize Reactor objects
         for i in range(self.n_reactors):
@@ -58,13 +68,22 @@ class ModelBridge():
         # Set the ground truth or experimental values
         self.Y_groudtruth = Y_groudtruth
         
+        # Set the quantity of interest (QOI)
+        if qoi not in qoi_choices:
+            raise ValueError("Input qoi must be profile, conversion or concentration.")
+        self.qoi = qoi
+        self.species_index = species_index
+
         # Set the weights for each data point
         if Y_weights is None:
-            if eval_profile:
+            if self.qoi == 'profile': 
                 Y_weights = np.ones((self.n_reactors, 1))
-            else:
+            elif self.qoi == 'conversion':
                 Y_weights = np.ones((self.n_reactors, self.m_specs))
-        
+            else: # exit concentration
+                Y_weights = np.ones((self.n_reactors, self.m_specs))
+
+        # normalize the weights 
         self.Y_weights = Y_weights/np.sum(Y_weights)
         
         
@@ -86,9 +105,30 @@ class ModelBridge():
         return Y_predict
     
     
-    def profile(self, xi):
+    def exit_concentration(self, xi):
         """Predict the conversions given a set of parameters"""
         
+        para_dict = {}
+        for name_i, para_i in zip(self.para_names, xi):
+            para_dict.update({name_i: para_i})    
+        
+        # Y_groudtruth has shape of n_reactors * n_int * m_specs        
+        Y_predict = []
+
+        # Compute the first output - conversion 
+        for i in range(self.n_reactors):
+            Reactor_i = self.Reactors[i]
+            Cf_i = Reactor_i.get_exit_concentration(self.rate_expression, para_dict, t_eval=self.t_eval, method=self.method)
+            Y_predict.append(Cf_i) 
+        
+        return Y_predict
+
+    
+    def profile(self, xi, t_eval=None):
+        """Predict the conversions given a set of parameters"""
+        if t_eval is None:
+            t_eval = self.t_eval
+
         para_dict = {}
         for name_i, para_i in zip(self.para_names, xi):
             para_dict.update({name_i: para_i})    
@@ -100,7 +140,7 @@ class ModelBridge():
         # Compute the first output - conversion 
         for i in range(self.n_reactors):
             Reactor_i = self.Reactors[i]
-            tC_profile_i = Reactor_i.get_profile(self.rate_expression, para_dict, t_eval=self.t_eval, method=self.method)
+            tC_profile_i = Reactor_i.get_profile(self.rate_expression, para_dict, t_eval=t_eval, method=self.method)
             t_predict.append(tC_profile_i[:, 0]) 
             Y_predict.append(tC_profile_i[:, 1:]) #ignore the first column since it's time
         
@@ -130,13 +170,30 @@ class ModelBridge():
             loss += WeightedRMSE(self.Y_groudtruth[i], Y_predict[i], self.Y_weights)
         
         return loss
+    
+
+    def loss_exit_concentration(self, xi):
+        """Define the loss function using RMSE"""
+        Y_predict = self.exit_concentration(xi)
+        
+        loss = 0
+        for i in range(self.n_reactors):
+            # Factor in the weights
+            loss += WeightedRMSE(self.Y_groudtruth[i], Y_predict[i], self.Y_weights)
+        
+        return loss
+
 
     def loss_func(self, xi):
         """Generic loss function"""
-        if self.eval_profile:
+
+        if self.qoi == 'profile': 
             return self.loss_profile(xi)
+        elif self.qoi == 'conversion':
+            return self.loss_conversion(xi)
+        else: # exit concentration
+            return self.loss_exit_concentration(xi)
         
-        return self.loss_conversion(xi)
         
         
 

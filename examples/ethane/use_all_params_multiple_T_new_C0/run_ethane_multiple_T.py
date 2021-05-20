@@ -1,13 +1,20 @@
 """
 Test on ethane system ODEs
+Test on the PFR case
 """
 import os
 import time
+import sys
+# temporary add the project path
+project_path = os.path.abspath(os.path.join(os.getcwd(), '..\..\..'))
+sys.path.insert(0, project_path)
+
 
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pmutt.constants as c
+import pandas as pd
 
 import estimator.utils as ut
 from estimator.optimizer import ModelBridge, BOOptimizer
@@ -136,7 +143,6 @@ m_specs = 7
 energy_unit = 'kJ'
 R_unit = 'kJ/mol/K'
 R_bar_unit = 'L bar/mol/K'
-temperature = 873  # K
 
 # Inlet Concentration Vals in M
 C2H6_in = 0.0005
@@ -148,12 +154,11 @@ CO_in = 0
 H2O_in = 0
 C0 = [C2H6_in, C2H4_in, CH4_in, H2_in, CO2_in, CO_in, H2O_in]
 
-# Integration time
-tf = 10
-
-# we can set the integration t_eval (optional)
-n_int = 11
-t_eval = np.linspace(0, tf, n_int)
+# varying integration times
+n_tf = 3
+tmax = 12
+tf = list(np.linspace(1, tmax, n_tf))
+t_eval = np.linspace(0, tmax, 100)
 
 # Set ground truth parameter values
 A0_EDH = 2.5E6
@@ -164,22 +169,17 @@ A0_RWGS = 1.9E6
 Ea_RWGS = 70  # kJ/mol
 
 # Kp values calculated at different T 
-# T kp value pair in a dictionary
+# Import Kp data
+Kp_file = 'Kp_Catalog.xlsx'
+example_path = os.path.abspath(os.path.join(os.getcwd(), '..'))
+Kp_file_path = os.path.join(example_path, Kp_file)
+Kp_data = pd.read_excel(Kp_file_path)
+# select the possible temperature values
+T_column_name = 'Temperature'
+temperatures = list(Kp_data['Temperature']) # in K
+nT = len(temperatures)
 
-Kp = {"EDH": {835: 0.0114,
-              848: 0.0157,
-              861: 0.0214,
-              873: 0.0281},
-      "Hyd": {835: 28700,
-              848: 24500,
-              861: 21100,
-              873: 18400},
-      "RWGS": {835: 0.296,
-               848: 0.321,
-               861: 0.347,
-               873: 0.372}
-      }
-
+# 6 parameters to fit
 para_ethane = {'EDH_prefactor': np.log10(A0_EDH),
                'EDH_Ea': Ea_EDH,
                'Hyd_prefactor': np.log10(A0_Hyd),
@@ -187,6 +187,7 @@ para_ethane = {'EDH_prefactor': np.log10(A0_EDH),
                'RWGS_prefactor': np.log10(A0_RWGS),
                'RWGS_Ea': Ea_RWGS
                }
+
 # parameter names
 para_name_ethane = list(para_ethane.keys())
 
@@ -194,7 +195,7 @@ para_name_ethane = list(para_ethane.keys())
 para_ground_truth = list(para_ethane.values())
 
 # Estimator name
-estimator_name = 'ethane_multiple_T'
+estimator_name = 'ethane_multiple_T_PFR'
 ut.clear_cache(estimator_name)
 
 
@@ -214,7 +215,7 @@ def rate_eq(concentrations, para_dict, stoichiometry, name, temperature):
     # Extract the parameters
     prefactor = 10 ** para_dict[name + '_prefactor']
     Ea = para_dict[name + '_Ea']
-    KEQ = Kp[name][int(temperature)]
+    KEQ = float(Kp_data[Kp_data['Temperature']==temperature]['EDH'])
 
     # Reaction quotient 
     Qp = 0
@@ -232,121 +233,71 @@ def rate_eq(concentrations, para_dict, stoichiometry, name, temperature):
 
 
 # %% Tests on the ethane system at different temperatures
-# Test on whether the rate can be calculated correctly
+# Generate the ground truth training data
 reactor_data = []
 Y_experiments = []
-n_reactor = len(Kp["EDH"].keys())
+Y_experiments_constant_T = [[] for _ in range(nT)]# a vector for plotting purposes
 Y_weights = np.ones(m_specs)
+# Set the weight for water as zero, others as 1
 Y_weights[-1] = 0.
-for T in Kp["EDH"].keys():
-    temperature = float(T)
-    rate_EDH = rate_eq(C0, para_ethane, stoichiometry[0], 'EDH', temperature)
-    rate_Hyd = rate_eq(C0, para_ethane, stoichiometry[1], 'Hyd', temperature)
-    rate_RWGS = rate_eq(C0, para_ethane, stoichiometry[2], 'RWGS', temperature)
-    # Test on a reactor model to perform integration
-    reactor_ethane = Reactor(stoichiometry, tf, C0=C0, names=rxn_names, temperature=temperature)
-    tC_profile = reactor_ethane.get_profile(rate_eq, para_ethane, t_eval=t_eval)
-    # Plot the profile
-    t_eval = tC_profile[:, 0]
-    C_profile = tC_profile[:, 1:]
-    plot_ethane(t_eval, C_profile, 'Ground truth at ' + str(T) + ' (K)', estimator_name)
-    # Test the model bridge
-    # Parse the specifics (reaction conditions) of reactor object into a dictionary
-    reactor_i = {}
-    reactor_i['C0'] = C0
-    reactor_i['tf'] = tf
-    reactor_i['names'] = rxn_names
-    reactor_i['temperature'] = temperature
-    reactor_data.append(reactor_i)
-    # # Use profile as the "experimental" data, n_reactor = 1
-    Y_experiments.append(C_profile)
-    # Set the weight for water as zero, others as 1
 
-# Input experimental data and models (rate expressions) into a model bridge
+for i, Ti in enumerate(temperatures):        
+    for tf_j in tf:
+        reactor_ethane_Ti = Reactor(stoichiometry, tf_j, C0=C0, names=rxn_names, temperature=Ti)
+        Cf = reactor_ethane_Ti.get_exit_concentration(rate_eq, para_ethane)
+        
+        # Test the model bridge
+        # Parse the specifics (reaction conditions) of reactor object into a dictionary
+        reactor_i = {}
+        reactor_i['C0'] = C0
+        reactor_i['tf'] = tf_j
+        reactor_i['names'] = rxn_names
+        reactor_i['temperature'] = Ti
+        reactor_data.append(reactor_i)
+        # Use conversion as the "experimental" data, n_reactor = nT * n_tf
+        Y_experiment_ij = Cf
+        Y_experiments.append(Y_experiment_ij)
+        Y_experiments_constant_T[i].append(Y_experiment_ij)
+    
+    
+
+#%% Input experimental data and models (rate expressions) into a model bridge
 bridge = ModelBridge(rate_eq, para_name_ethane, name=estimator_name)
-bridge.input_data(stoichiometry, reactor_data, Y_experiments, Y_weights, t_eval, eval_profile=True)
+bridge.input_data(stoichiometry, reactor_data, Y_experiments, Y_weights,  qoi='concentration')
 
-# # Test the bridge on ground truth parameters, the loss should be 0
-# t_vec_predict, Y_predict = bridge.profile(para_ground_truth)
-# loss_ground_truth = bridge.loss_func(para_ground_truth)
-# for i, T in enumerate(Kp["EDH"].keys()):
-#     plot_ethane_overlap(t_vec_predict[i], Y_predict[i], t_eval, Y_experiments[i], 'Ground truth @ T ' + str(T),
-#                         estimator_name)
 
-# Set up an optimizer
+#%% Set up an optimizer
 # Automatically compute the parameter ranges given a deviation
 deviation = 0.25
 para_ranges = [[-np.abs(vi) * deviation + vi, np.abs(vi) * deviation + vi] for vi in para_ground_truth]
 
 # Start a timer
 start_time = time.time()
-n_iter = 300
+n_iter = 100
 optimizer = BOOptimizer(estimator_name)
 X_opt, loss_opt, Exp = optimizer.optimize(bridge.loss_func, para_ranges, n_iter, log_flag=True)
 end_time = time.time()
 
-# Predict the conversions given the optimal set of parameters
-t_opt, Y_opt = bridge.profile(X_opt)
-for i, T in enumerate(Kp["EDH"].keys()):
-    plot_ethane_overlap(t_opt[i], Y_opt[i], t_eval, Y_experiments[i], 'Optimal Set @ T=' + str(T), estimator_name)
-plot_ethane_residual(t_opt[3], Y_opt[3], t_eval, Y_experiments[3], 'Residual @ T=873K', estimator_name)
-# Print the results
-ut.write_results(estimator_name, start_time, end_time, loss_opt, X_opt, para_ground_truth)
 
 
-# %% Test on the ethane system, with noise
-# Add to noise to the concentrations
-estimator_name = 'ethane_multiple_T_noisy'
-ut.clear_cache(estimator_name)
-
-reactor_data = []
-Y_experiments_noisy = []
-n_reactor = len(Kp["EDH"].keys())
-Y_weights = np.ones(m_specs)
-Y_weights[-1] = 0.
-for T in Kp["EDH"].keys():
-    temperature = float(T)
-    rate_EDH = rate_eq(C0, para_ethane, stoichiometry[0], 'EDH', temperature)
-    rate_Hyd = rate_eq(C0, para_ethane, stoichiometry[1], 'Hyd', temperature)
-    rate_RWGS = rate_eq(C0, para_ethane, stoichiometry[2], 'RWGS', temperature)
-    # Test on a reactor model to perform integration
-    reactor_ethane = Reactor(stoichiometry, tf, C0=C0, names=rxn_names, temperature=temperature)
-    tC_profile = reactor_ethane.get_profile(rate_eq, para_ethane, t_eval=t_eval)
-    # Plot the profile
-    t_eval = tC_profile[:, 0]
-    C_profile = tC_profile[:, 1:]
-    noise_level = 0.00001
-    noise_matrix = np.random.normal(loc=0, scale=noise_level, size=C_profile.shape)
-    C_profile_noisy = noise_matrix + C_profile
-    plot_ethane_overlap(t_eval, C_profile, t_eval, C_profile+noise_matrix, 'Noisy data @T=' + str(T) + ' (K)', estimator_name)
-    # Parse the specifics (reaction conditions) of reactor object into a dictionary
-    reactor_i = {}
-    reactor_i['C0'] = C0
-    reactor_i['tf'] = tf
-    reactor_i['names'] = rxn_names
-    reactor_i['temperature'] = temperature
-    reactor_data.append(reactor_i)
-    # # Use profile as the "experimental" data, n_reactor = 1
-    Y_experiments_noisy.append(C_profile_noisy)
-    # Set the weight for water as zero, others as 1
-# Construct a ModelBridge object
-bridge_noisy = ModelBridge(rate_eq, para_name_ethane, name=estimator_name)
-bridge_noisy.input_data(stoichiometry, reactor_data, Y_experiments_noisy, Y_weights, t_eval=t_eval, eval_profile=True)
-
-# Perform the optimization
-start_time = time.time()
-n_iter = 200
-optimizer_noisy = BOOptimizer(estimator_name)
-X_opt_noisy, loss_opt_noisy, Exp_noisy = optimizer_noisy.optimize(bridge_noisy.loss_func, para_ranges, n_iter,
-                                                                  log_flag=True)
-end_time = time.time()
+#%% 
+para_ethane_opt = {}
+for xi, name_i in zip(X_opt, para_name_ethane):
+    para_ethane_opt[name_i] = xi
+t_opt = []
+Y_opt = []
 
 # Predict the conversions given the optimal set of parameters
-t_opt_noisy, Y_opt_noisy = bridge_noisy.profile(X_opt_noisy)
-for i, T in enumerate(Kp["EDH"].keys()):
-    plot_ethane_overlap(t_opt_noisy[i], Y_opt_noisy[i], t_eval, Y_experiments_noisy[i], 'Optimal Set @ T=' + str(T), estimator_name)
-    plot_ethane_residual(t_opt_noisy[i], Y_opt_noisy[i], t_eval, Y_experiments_noisy[i], 'Residual Noisy @873K', estimator_name)
+for i, Ti in enumerate(temperatures):
+    reactor_ethane_Ti = Reactor(stoichiometry, tmax, C0=C0, names=rxn_names, temperature=Ti)
+    tC_profile = reactor_ethane_Ti.get_profile(rate_eq, para_ethane_opt, t_eval = t_eval)
+    t_opt_i = tC_profile[:, 0]
+    Y_opt_i = tC_profile[:, 1:]
+    t_opt.append(t_opt_i)
+    Y_opt.append(Y_opt_i)
+    plot_ethane_overlap(t_opt_i, Y_opt_i, tf, np.array(Y_experiments_constant_T[i]), 'Optimal Set @ T=' + str(Ti), estimator_name)
 
+
+#%%
 # Print the results
 ut.write_results(estimator_name, start_time, end_time, loss_opt, X_opt, para_ground_truth)
-

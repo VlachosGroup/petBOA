@@ -3,6 +3,10 @@ Test on ethane system ODEs
 """
 import os
 import time
+import sys
+# temporary add the project path
+project_path = os.path.abspath(os.path.join(os.getcwd(), '..\..\..'))
+sys.path.insert(0, project_path)
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -142,7 +146,7 @@ temperature = 873  # K
 C2H6_in = 0.0005
 C2H4_in = 0
 CH4_in = 0
-H2_in = 0.0005
+H2_in = 0
 CO2_in = 0.0005
 CO_in = 0
 H2O_in = 0
@@ -335,7 +339,7 @@ bridge_noisy.input_data(stoichiometry, reactor_data, Y_experiments_noisy, Y_weig
 
 # Perform the optimization
 start_time = time.time()
-n_iter = 300
+n_iter = 200
 optimizer_noisy = BOOptimizer(estimator_name)
 X_opt_noisy, loss_opt_noisy, Exp_noisy = optimizer_noisy.optimize(bridge_noisy.loss_func, para_ranges, n_iter,
                                                                   log_flag=True)
