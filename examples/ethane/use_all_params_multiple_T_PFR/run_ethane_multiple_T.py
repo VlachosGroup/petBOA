@@ -157,7 +157,9 @@ C0 = [C2H6_in, C2H4_in, CH4_in, H2_in, CO2_in, CO_in, H2O_in]
 # varying integration times
 n_tf = 3
 tmax = 12
+# concentration measured at a list of residence times 
 tf = list(np.linspace(1, tmax, n_tf))
+# time points only used for plotting purpose
 t_eval = np.linspace(0, tmax, 100)
 
 # Set ground truth parameter values
@@ -169,7 +171,7 @@ A0_RWGS = 1.9E6
 Ea_RWGS = 70  # kJ/mol
 
 # Kp values calculated at different T 
-# Import Kp data
+# Import Kp data from an excel sheet 
 Kp_file = 'Kp_Catalog.xlsx'
 example_path = os.path.abspath(os.path.join(os.getcwd(), '..'))
 Kp_file_path = os.path.join(example_path, Kp_file)
@@ -246,19 +248,16 @@ for i, Ti in enumerate(temperatures):
         reactor_ethane_Ti = Reactor(stoichiometry, tf_j, C0=C0, names=rxn_names, temperature=Ti)
         Cf = reactor_ethane_Ti.get_exit_concentration(rate_eq, para_ethane)
         
-        # Test the model bridge
         # Parse the specifics (reaction conditions) of reactor object into a dictionary
         reactor_i = {}
         reactor_i['C0'] = C0
         reactor_i['tf'] = tf_j
-        reactor_i['names'] = rxn_names
         reactor_i['temperature'] = Ti
         reactor_data.append(reactor_i)
-        # Use conversion as the "experimental" data, n_reactor = nT * n_tf
+        # Use exit concentrations as the "experimental" data, n_reactor = nT * n_tf
         Y_experiment_ij = Cf
         Y_experiments.append(Y_experiment_ij)
         Y_experiments_constant_T[i].append(Y_experiment_ij)
-    
     
 
 #%% Input experimental data and models (rate expressions) into a model bridge
@@ -280,10 +279,11 @@ end_time = time.time()
 
 
 
-#%% 
-para_ethane_opt = {}
-for xi, name_i in zip(X_opt, para_name_ethane):
-    para_ethane_opt[name_i] = xi
+#%% Compare the esitmated profiles to the grouth truth data points
+# Optimal parameter values
+para_ethane_opt = ut.para_values_to_dict(X_opt, para_name_ethane)
+
+# lists of estimated profile at each temperature 
 t_opt = []
 Y_opt = []
 

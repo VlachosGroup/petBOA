@@ -31,3 +31,11 @@ def write_results(estimator_name, start_time, end_time, loss, X, X_true=None):
     if X_true is not None:
         file.write('True Parameters are {} \n'.format(X_true))
     file.close()
+
+
+def para_values_to_dict(xi, para_names):
+    """Conevrt parameter values to a dictionary"""
+    para_dict = {}
+    for name_i, para_i in zip(para_names, xi):
+        para_dict.update({name_i: para_i})    
+    return para_dict

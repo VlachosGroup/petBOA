@@ -268,7 +268,7 @@ for T in Kp["EDH"].keys():
 
 # Input experimental data and models (rate expressions) into a model bridge
 bridge = ModelBridge(rate_eq, para_name_ethane, name=estimator_name)
-bridge.input_data(stoichiometry, reactor_data, Y_experiments, Y_weights, t_eval, eval_profile=True)
+bridge.input_data(stoichiometry, reactor_data, Y_experiments, Y_weights, t_eval, qoi='profile')
 
 # # Test the bridge on ground truth parameters, the loss should be 0
 # t_vec_predict, Y_predict = bridge.profile(para_ground_truth)
@@ -335,7 +335,7 @@ for T in Kp["EDH"].keys():
     # Set the weight for water as zero, others as 1
 # Construct a ModelBridge object
 bridge_noisy = ModelBridge(rate_eq, para_name_ethane, name=estimator_name)
-bridge_noisy.input_data(stoichiometry, reactor_data, Y_experiments_noisy, Y_weights, t_eval=t_eval, eval_profile=True)
+bridge_noisy.input_data(stoichiometry, reactor_data, Y_experiments_noisy, Y_weights, t_eval=t_eval, qoi='profile')
 
 # Perform the optimization
 start_time = time.time()

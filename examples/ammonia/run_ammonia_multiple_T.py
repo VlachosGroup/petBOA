@@ -15,7 +15,7 @@ from nextorch import plotting
 from estimator.optimizer import ModelBridge, BOOptimizer
 from estimator.expressions import  general_rate
 from estimator.reactor import Reactor
-
+import estimator.utils as ut
 
 #%% Import and process data
 # Set the reaction constants
@@ -68,6 +68,9 @@ for i in range(n_reactors):
         
 
 #%% Parameter estimation section
+# estimator name 
+estimator_name = 'ammonia_multiple_T'
+
 # Set the number of optimization loops
 n_iter = 50
 
@@ -92,23 +95,19 @@ para_ranges_2 = [[0.1, 10],
 start_time = time.time()
 
 # Input experimental data and models (rate expressions) into a model bridge
-bridge = ModelBridge(rate_expression, para_names_2, name = 'rate_2')
-bridge.input_data(stoichiometry, reactor_data, Y_experiments, Y_weights)
+bridge = ModelBridge(rate_expression, para_names_2, name = estimator_name)
+bridge.input_data(stoichiometry, reactor_data, Y_experiments, Y_weights, qoi='conversion')
 
 # set up an optimzer 
-optimizer = BOOptimizer()
+optimizer = BOOptimizer(estimator_name)
 X_opt, loss_opt, Exp = optimizer.optimize(bridge.loss_func, para_ranges_2, n_iter)
 end_time= time.time()
 
 # Predict the conversions given the optimal set of paraemeters
-Y_opt = bridge.conversion_steady_state(X_opt)
+Y_opt = np.array(bridge.conversion(X_opt))
 plotting.parity(Y_opt, Y_experiments)
 
 # Print the results
-file = open(bridge.name + ".txt","w")
-file.write('Parameter estimation takes {:.2f} min \n'.format((end_time-start_time)/60))
-file.write('Final loss {:.3f} \n'.format(loss_opt))
-file.write('Parameters are {} \n'.format(X_opt))
-file.close()
+ut.write_results(estimator_name, start_time, end_time, loss_opt, X_opt)
 
     

@@ -244,7 +244,7 @@ Y_weights[:, -1] = 0
 
 # Input experimental data and models (rate expressions) into a model bridge
 bridge = ModelBridge(rate_eq, para_name_ethane, name=estimator_name)
-bridge.input_data(stoichiometry, reactor_data, Y_experiments, Y_weights, t_eval=t_eval, eval_profile=True)
+bridge.input_data(stoichiometry, reactor_data, Y_experiments, Y_weights, t_eval=t_eval, qoi='profile')
 
 # Test the bridge on a set of 1s
 para_set_1 = np.ones(len(para_name_ethane))
@@ -303,7 +303,7 @@ Y_experiments_noisy = [C_profile_noisy]
 
 # Construct a ModelBridge object
 bridge_noisy = ModelBridge(rate_eq, para_name_ethane, name=estimator_name)
-bridge_noisy.input_data(stoichiometry, reactor_data, Y_experiments_noisy, Y_weights, t_eval=t_eval, eval_profile=True)
+bridge_noisy.input_data(stoichiometry, reactor_data, Y_experiments_noisy, Y_weights, t_eval=t_eval, qoi='profile')
 
 # Perform the optimization
 start_time = time.time()

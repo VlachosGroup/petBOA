@@ -241,7 +241,7 @@ Y_weights[:,-1] = 0
 
 # Input experimental data and models (rate expressions) into a model bridge
 bridge = ModelBridge(rate_eq, para_name_ethane, name = estimator_name)
-bridge.input_data(stoichiometry, reactor_data, Y_experiments, Y_weights, t_eval=t_eval, eval_profile=True)
+bridge.input_data(stoichiometry, reactor_data, Y_experiments, Y_weights, t_eval=t_eval, qoi='profile')
 
 # Set up an optimizer 
 # Automatically compute the parameter ranges given a deviation

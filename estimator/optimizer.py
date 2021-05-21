@@ -9,7 +9,7 @@ import copy
 from nextorch import plotting, bo, doe, utils, io
 from estimator.expressions import general_rate
 from estimator.reactor import Reactor
-from estimator.utils import WeightedRMSE
+from estimator.utils import WeightedRMSE, para_values_to_dict
 
 import time
 
@@ -36,8 +36,9 @@ class ModelBridge():
         Y_groudtruth, 
         Y_weights=None, 
         t_eval=None, 
+        rxn_names=None,
         qoi='profile', 
-        species_index = 0,
+        species_indices = 0,
         method='LSODA'):
 
         """Initialize n Reactor objects"""
@@ -48,8 +49,9 @@ class ModelBridge():
             n_rxn = 1
         else:
             n_rxn = len(stoichiometry)
+
         self.n_rxn = n_rxn
-        self.m_specs = len(stoichiometry[0])
+        self.m_specs_total = len(stoichiometry[0])
         
         # set up reactor objects 
         self.Reactors = []
@@ -63,6 +65,8 @@ class ModelBridge():
         for i in range(self.n_reactors):
             reactor_data_i = reactor_data[i]
             Reactor_i = Reactor(stoichiometry, **reactor_data_i)
+            if rxn_names is not None:
+                Reactor_i.names = rxn_names
             self.Reactors.append(Reactor_i)
             
         # Set the ground truth or experimental values
@@ -70,18 +74,27 @@ class ModelBridge():
         
         # Set the quantity of interest (QOI)
         if qoi not in qoi_choices:
-            raise ValueError("Input qoi must be profile, conversion or concentration.")
+            raise ValueError("Input qoi must be either profile, conversion or concentration.")
         self.qoi = qoi
-        self.species_index = species_index
+
+        # species index is a list of integers 
+        # whose conversions that the users care about
+        if not isinstance(species_indices, list):
+            species_indices = [species_indices]
+        self.species_indices = species_indices
+        self.m_specs_conversion = len(species_indices)
+
 
         # Set the weights for each data point
         if Y_weights is None:
-            if self.qoi == 'profile': 
-                Y_weights = np.ones((self.n_reactors, 1))
-            elif self.qoi == 'conversion':
-                Y_weights = np.ones((self.n_reactors, self.m_specs))
-            else: # exit concentration
-                Y_weights = np.ones((self.n_reactors, self.m_specs))
+            Y_weights = np.ones((self.n_reactors, 1))
+
+            # if self.qoi == 'profile': 
+            #    Y_weights = np.ones((self.n_reactors, 1))
+            # elif self.qoi == 'conversion':
+            #    Y_weights = np.ones((self.n_reactors, self.m_specs))
+            # else: # exit concentration
+            #    Y_weights = np.ones((self.n_reactors, self.m_specs))
 
         # normalize the weights 
         self.Y_weights = Y_weights/np.sum(Y_weights)
@@ -90,17 +103,16 @@ class ModelBridge():
     def conversion(self, xi):
         """Predict the conversions given a set of parameters"""
         
-        para_dict = {}
-        for name_i, para_i in zip(self.para_names, xi):
-            para_dict.update({name_i: para_i})    
-        
-        Y_predict = np.zeros((self.n_reactors, 1))
+        para_dict = para_values_to_dict(xi, self.para_names)
+
+        Y_predict = []
         
         # Compute the first output - conversion 
         for i in range(self.n_reactors):
             Reactor_i = self.Reactors[i]
-            xf, _ = Reactor_i.get_conversion(self.rate_expression, para_dict, t_eval=self.t_eval, method=self.method)
-            Y_predict[i] = xf
+            xf, _ = Reactor_i.get_conversion(self.rate_expression, para_dict, \
+                species_indices= self.species_indices, t_eval=self.t_eval, method=self.method)
+            Y_predict.append(xf)
     
         return Y_predict
     
@@ -108,10 +120,7 @@ class ModelBridge():
     def exit_concentration(self, xi):
         """Predict the conversions given a set of parameters"""
         
-        para_dict = {}
-        for name_i, para_i in zip(self.para_names, xi):
-            para_dict.update({name_i: para_i})    
-        
+        para_dict = para_values_to_dict(xi, self.para_names)
         # Y_groudtruth has shape of n_reactors * n_int * m_specs        
         Y_predict = []
 
@@ -124,15 +133,12 @@ class ModelBridge():
         return Y_predict
 
     
-    def profile(self, xi, t_eval=None):
+    def profile(self, xi, t_eval=None, return_t_eval=True):
         """Predict the conversions given a set of parameters"""
         if t_eval is None:
             t_eval = self.t_eval
 
-        para_dict = {}
-        for name_i, para_i in zip(self.para_names, xi):
-            para_dict.update({name_i: para_i})    
-        
+        para_dict = para_values_to_dict(xi, self.para_names)
         # Y_groudtruth has shape of n_reactors * n_int * m_specs        
         Y_predict = []
         t_predict = []
@@ -144,55 +150,28 @@ class ModelBridge():
             t_predict.append(tC_profile_i[:, 0]) 
             Y_predict.append(tC_profile_i[:, 1:]) #ignore the first column since it's time
         
+        if return_t_eval:
+            return t_predict, Y_predict
 
-        return t_predict, Y_predict
+        return Y_predict
         
-    
-    def loss_conversion(self, xi):
-        """Define the loss function using RMSE"""
-        Y_predict = self.conversion(xi)
-        
-        # Factor in the weights
-        loss =  WeightedRMSE(self.Y_groudtruth, Y_predict, self.Y_weights)
-        #weighted_diff = (self.Y_groudtruth - Y_predict) 
-        #np.sum((weighted_diff)**2 * self.Y_weights)/self.Y_groudtruth.size #MSE
-        
-        return loss
-    
-    
-    def loss_profile(self, xi):
-        """Define the loss function using RMSE"""
-        _, Y_predict = self.profile(xi)
-        
-        loss = 0
-        for i in range(self.n_reactors):
-            # Factor in the weights
-            loss += WeightedRMSE(self.Y_groudtruth[i], Y_predict[i], self.Y_weights)
-        
-        return loss
-    
-
-    def loss_exit_concentration(self, xi):
-        """Define the loss function using RMSE"""
-        Y_predict = self.exit_concentration(xi)
-        
-        loss = 0
-        for i in range(self.n_reactors):
-            # Factor in the weights
-            loss += WeightedRMSE(self.Y_groudtruth[i], Y_predict[i], self.Y_weights)
-        
-        return loss
-
 
     def loss_func(self, xi):
         """Generic loss function"""
+        loss = 0
 
-        if self.qoi == 'profile': 
-            return self.loss_profile(xi)
-        elif self.qoi == 'conversion':
-            return self.loss_conversion(xi)
+        if self.qoi == 'conversion': 
+            Y_predict = self.conversion(xi)
+        elif self.qoi == 'profile':
+            Y_predict = self.profile(xi, return_t_eval=False)
         else: # exit concentration
-            return self.loss_exit_concentration(xi)
+            Y_predict = self.exit_concentration(xi)
+        
+        for i in range(self.n_reactors):
+            # Factor in the weights
+            loss += WeightedRMSE(self.Y_groudtruth[i], Y_predict[i], self.Y_weights)
+        
+        return loss
         
         
         
@@ -306,7 +285,6 @@ class MaskedFunc(VectorizedFunc):
         Y_real = []
         for i, xi in enumerate(X_real):
             xi_full = self.mask.prepare_X(xi)
-            #print(xi_full)
             yi = self.objective_func(xi_full)    
             Y_real.append(yi)
                 
@@ -348,7 +326,6 @@ class BOOptimizer():
         n_init = 5 * n_dim
         X_init = doe.latin_hypercube(n_dim = n_dim, n_points = n_init, seed= 1)
         
-        #print(X_init)
         Y_init = bo.eval_objective_func(X_init, para_ranges_varying, objective_func_vectorized.predict)
         
         # Import the initial data

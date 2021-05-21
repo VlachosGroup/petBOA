@@ -107,7 +107,7 @@ class Reactor():
     def __init__(self, stoichiometry, tf, P0=None, feed_composition=None, C0=None, names=None, temperature=None):
         """Initialize the constants"""
         self.stoichiometry = stoichiometry
-        self.names = names
+        self.names = names #names of the reactions
         self.P0 = P0
         self.feed_composition = feed_composition
         self.t0 = 0
@@ -145,14 +145,21 @@ class Reactor():
         return Cf
 
 
-    def get_conversion(self, rate_expressions, para_dict, species_index = 0, t_eval=None, method='LSODA'):
-        """Get the final conversion of a specie"""
+    def get_conversion(self, rate_expressions, para_dict, species_indices = 0, t_eval=None, method='LSODA'):
+        """
+        Get the final conversion of a specie
+        Species index can be a list or a single integer
+        """
+        if not isinstance(species_indices, list):
+            species_indices = [species_indices]
         
         # Get the profile
         Cf = self.get_exit_concentration(rate_expressions, para_dict, t_eval, method)
         
         # Compute the final percentage conversion
-        xf = (self.C0[species_index] - Cf[species_index])/self.C0[species_index] * 100
+        xf = np.zeros(len(species_indices))
+        for i, si in enumerate(species_indices):
+            xf[i] = (self.C0[si] - Cf[si])/self.C0[si] * 100
         
         # Compute the final rates
         dcdt_f = dcdt(self.tf, Cf, self.stoichiometry, rate_expressions, para_dict, self.names, self.temperature)
