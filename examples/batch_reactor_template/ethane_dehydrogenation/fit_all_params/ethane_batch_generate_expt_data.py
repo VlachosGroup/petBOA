@@ -3,7 +3,7 @@ Test on ethane_dehydrogenation system ODEs
 """
 import pandas as pd
 from estimator.reactor import Reactor
-from examples.batch_reactor_template.ethane_dehydrogenation.fit_all_params_multiple_T.ethane_model_load import *
+from examples.batch_reactor_template.ethane_dehydrogenation.fit_all_params.ethane_model_load import *
 
 # Reaction equations:
 # EDH: ethane_dehydrogenation dehydrogenation: C2H6 -> C2H4 + H2
@@ -34,11 +34,11 @@ para_name_ethane = list(para_ethane.keys())
 # ground truth parameter values
 para_ground_truth = list(para_ethane.values())
 
-# Inlet Concentration Vals in M
+# Inlet Concentration Values in M
 C2H6_in = 0.0005
 C2H4_in = 0
 CH4_in = 0
-H2_in = 0
+H2_in = 0.0005
 CO2_in = 0.0005
 CO_in = 0
 H2O_in = 0
