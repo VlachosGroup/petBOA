@@ -1,7 +1,7 @@
 # Parameter Estimation - BO
 
 This is an open-source software package to facilitate parameter estimation using 
-Bayersion optimization implemented by NEXTorch/PyBOTorch framework.
+Bayersion optimization implemented by NEXTorch/BOTorch framework.
 
 Documentation
 -------------
@@ -44,6 +44,7 @@ Getting Started
 2. Install the dependencies using using pip. Usually installing nextorch should install all other depedencies::
 
     `pip install nextorch`
+Note: It will be a good idea to install all the dependencies in a virtual python enviroment such as [virtualenv](https://virtualenv.pypa.io/en/latest/) or [conda env](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) to make sure you don't corrupt system python. 
 
 3. Run the unit tests for nextorch using the instructions at https://nextorch.readthedocs.io/en/latest/
 
