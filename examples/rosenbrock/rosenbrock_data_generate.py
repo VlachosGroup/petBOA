@@ -5,9 +5,9 @@ f(x,y) = (a - x)^2 + b(y - x^2)^2
 Data generated using a = 1 and b = 100
 """
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
 
 def rosenbrock(input_mesh, a, b):
@@ -34,8 +34,8 @@ def rosenbrock(input_mesh, a, b):
 
 def generate_data(x=np.linspace(-2, 2, 10),
                   y=np.linspace(-1, 3, 10),
-                  a=1.0,
-                  b=100.0,
+                  a=1.00,
+                  b=100.00,
                   file_name='data.csv'):
     """
     Generate data used for parameter estimation
@@ -49,16 +49,16 @@ def generate_data(x=np.linspace(-2, 2, 10),
     plt.clf()
     plt.contourf(X, Y, Z, 20)
     plt.colorbar()
-    plt.contour(X, Y, Z, 20, colors = "black")
+    plt.contour(X, Y, Z, 20, colors="black")
     plt.grid()
     plt.xlabel("x")
     plt.ylabel("y")
-    plt.show()
-    plt.savefig('contour.png')
+    # plt.show()
+    plt.savefig('rosenbrock-contour.png')
     data = np.array([X, Y, Z]).reshape(3, -1).T
     df = pd.DataFrame(data, columns=['X', 'Y', 'Z'])
-    df.to_csv('data.csv',index=False)
+    df.to_csv('data.csv', index=False)
 
 
 if __name__ == "__main__":
-    generate_data()
+    generate_data(a=1.00, b=100.00)

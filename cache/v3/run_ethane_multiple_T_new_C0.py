@@ -1,11 +1,11 @@
 """
-Test on ethane system ODEs
+Test on ethane_dehydrogenation system ODEs
 """
 import os
 import time
 import sys
 # temporary add the project path
-project_path = os.path.abspath(os.path.join(os.getcwd(), '..\..\..'))
+project_path = os.path.abspath(os.path.join(os.getcwd(), '../../../..'))
 sys.path.insert(0, project_path)
 
 import matplotlib
@@ -14,8 +14,8 @@ import numpy as np
 import pmutt.constants as c
 
 import estimator.utils as ut
-from estimator.optimizer import ModelBridge, BOOptimizer
-from estimator.reactor import Reactor
+from estimator.optimizer import BOOptimizer
+from estimator.reactor import Reactor, ModelBridge
 
 # Set matplotlib default values
 font = {'size': 20}
@@ -120,7 +120,7 @@ def plot_ethane_residual(t_vec1, C_profile1, t_vec2, C_profile2, title=None, sav
 
 # %% Define the problem
 # Reaction equations:
-# EDH: ethane dehydrogenation: C2H6 -> C2H4 + H2
+# EDH: ethane_dehydrogenation dehydrogenation: C2H6 -> C2H4 + H2
 # Hyd: hydrogenolysis: C2H6 + H2 -> 2CH4
 # RWGS: Reverse water-gas shift: CO2 + H2 -> CO + H2O
 
@@ -235,7 +235,7 @@ def rate_eq(concentrations, para_dict, stoichiometry, name, temperature):
     return rate_value
 
 
-# %% Tests on the ethane system at different temperatures
+# %% Tests on the ethane_dehydrogenation system at different temperatures
 # Test on whether the rate can be calculated correctly
 reactor_data = []
 Y_experiments = []
@@ -298,7 +298,7 @@ plot_ethane_residual(t_opt[3], Y_opt[3], t_eval, Y_experiments[3], 'Residual @ T
 ut.write_results(estimator_name, start_time, end_time, loss_opt, X_opt, para_ground_truth)
 
 
-# %% Test on the ethane system, with noise
+# %% Test on the ethane_dehydrogenation system, with noise
 # Add to noise to the concentrations
 estimator_name = 'ethane_multiple_T_noisy'
 ut.clear_cache(estimator_name)

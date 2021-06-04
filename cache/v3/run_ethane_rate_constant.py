@@ -1,13 +1,9 @@
 """
-Test on ethane system ODEs
+Test on ethane_dehydrogenation system ODEs
 """
 import os
 import time
 import sys
-# temporary add the project path
-project_path = os.path.abspath(os.path.join(os.getcwd(), '..\..\..'))
-sys.path.insert(0, project_path)
-
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -16,111 +12,112 @@ import pmutt.constants as c
 import estimator.utils as ut
 from estimator.optimizer import ModelBridge, BOOptimizer
 from estimator.reactor import Reactor
+from estimator.plots import plot_profile
 
-# Set matplotlib default values
-font = {'size': 20}
-
-matplotlib.rc('font', **font)
-matplotlib.rcParams['axes.linewidth'] = 1.5
-matplotlib.rcParams['xtick.major.size'] = 8
-matplotlib.rcParams['xtick.major.width'] = 2
-matplotlib.rcParams['ytick.major.size'] = 8
-matplotlib.rcParams['ytick.major.width'] = 2
-
-
-def plot_ethane(t_vec, C_profile, title=None, save_path=None):
-    """
-    plot the ode profiles 
-    """
-    fig, ax = plt.subplots(figsize=(6, 6))
-    ax.plot(t_vec, C_profile[:, 0], label=r'$\rm C_{2}H_{6}$')
-    ax.plot(t_vec, C_profile[:, 1], label=r'$\rm C_{2}H_{4}$')
-    ax.plot(t_vec, C_profile[:, 2], label=r'$\rm CH_{4}$')
-    ax.plot(t_vec, C_profile[:, 3], label=r'$\rm H_{2}$')
-    ax.plot(t_vec, C_profile[:, 4], label=r'$\rm CO_{2}$')
-    ax.plot(t_vec, C_profile[:, 5], label=r'$\rm CO$')
-    ax.plot(t_vec, C_profile[:, 6], label=r'$\rm H_{2}O$')
-    ax.set_xlabel('t (s)')
-    ax.set_ylabel('C (mol/L)')
-    ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-
-    fig_name = 'profile'
-    if title is not None:
-        ax.set_title(title)
-        fig_name += ('_' + title.replace(' ', ''))
-    if save_path is None:
-        save_path = os.getcwd()
-
-    fig.savefig(os.path.join(save_path, fig_name + '.png'), bbox_inches="tight")
-
-
-def plot_ethane_overlap(t_vec1, C_profile1, t_vec2, C_profile2, title=None, save_path=None, opt_flag=False):
-    """
-    Plot the ode profiles, 
-    Check whether the first profile matches with the second
-    """
-    fig, ax = plt.subplots(figsize=(6, 6))
-    ax.plot(t_vec1, C_profile1[:, 0], label=r'$\rm C_{2}H_{6}$')
-    ax.plot(t_vec1, C_profile1[:, 1], label=r'$\rm C_{2}H_{4}$')
-    ax.plot(t_vec1, C_profile1[:, 2], label=r'$\rm CH_{4}$')
-    ax.plot(t_vec1, C_profile1[:, 3], label=r'$\rm H_{2}$')
-    ax.plot(t_vec1, C_profile1[:, 4], label=r'$\rm CO_{2}$')
-    ax.plot(t_vec1, C_profile1[:, 5], label=r'$\rm CO$')
-    ax.plot(t_vec1, C_profile1[:, 6], label=r'$\rm H_{2}O$')
-    # scatter for the second profile
-    ax.scatter(t_vec2, C_profile2[:, 0], s=35, alpha=0.3)
-    ax.scatter(t_vec2, C_profile2[:, 1], s=35, alpha=0.3)
-    ax.scatter(t_vec2, C_profile2[:, 2], s=35, alpha=0.3)
-    ax.scatter(t_vec2, C_profile2[:, 3], s=35, alpha=0.3)
-    ax.scatter(t_vec2, C_profile2[:, 4], s=35, alpha=0.3)
-    ax.scatter(t_vec2, C_profile2[:, 5], s=35, alpha=0.3)
-    ax.scatter(t_vec2, C_profile2[:, 6], s=35, alpha=0.3)
-
-    ax.set_xlabel('t (s)')
-    ax.set_ylabel('C (mol/L)')
-    ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-
-    fig_name = 'profiles_overlap'
-    if title is not None:
-        ax.set_title(title)
-        fig_name += ('_' + title.replace(' ', ''))
-    if save_path is None:
-        save_path = os.getcwd()
-
-    fig.savefig(os.path.join(save_path, fig_name + '.png'), bbox_inches="tight")
-
-
-def plot_ethane_residual(t_vec1, C_profile1, t_vec2, C_profile2, title=None, save_path=None):
-    """
-    Plot the ode profiles,
-    Check whether the first profile matches with the second
-    """
-    fig, ax = plt.subplots(figsize=(6, 6))
-    ax.plot(t_vec1, C_profile1[:, 0] - C_profile2[:, 0], label=r'$\rm C_{2}H_{6}$')
-    ax.plot(t_vec1, C_profile1[:, 1] - C_profile2[:, 1], label=r'$\rm C_{2}H_{4}$')
-    ax.plot(t_vec1, C_profile1[:, 2] - C_profile2[:, 2], label=r'$\rm CH_{4}$')
-    ax.plot(t_vec1, C_profile1[:, 3] - C_profile2[:, 3], label=r'$\rm H_{2}$')
-    ax.plot(t_vec1, C_profile1[:, 4] - C_profile2[:, 4], label=r'$\rm CO_{2}$')
-    ax.plot(t_vec1, C_profile1[:, 5] - C_profile2[:, 5], label=r'$\rm CO$')
-    ax.plot(t_vec1, C_profile1[:, 6] - C_profile2[:, 6], label=r'$\rm H_{2}O$')
-
-    ax.set_xlabel('t (s)')
-    ax.set_ylabel('C (mol/L)')
-    ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-
-    fig_name = 'error_residual'
-    if title is not None:
-        ax.set_title(title)
-        fig_name += ('_' + title.replace(' ', ''))
-    if save_path is None:
-        save_path = os.getcwd()
-
-    fig.savefig(os.path.join(save_path, fig_name + '.png'), bbox_inches="tight")
+# # Set matplotlib default values
+# font = {'size': 20}
+#
+# matplotlib.rc('font', **font)
+# matplotlib.rcParams['axes.linewidth'] = 1.5
+# matplotlib.rcParams['xtick.major.size'] = 8
+# matplotlib.rcParams['xtick.major.width'] = 2
+# matplotlib.rcParams['ytick.major.size'] = 8
+# matplotlib.rcParams['ytick.major.width'] = 2
+#
+#
+# def plot_ethane(t_vec, C_profile, title=None, save_path=None):
+#     """
+#     plot the ode profiles
+#     """
+#     fig, ax = plt.subplots(figsize=(6, 6))
+#     ax.plot(t_vec, C_profile[:, 0], label=r'$\rm C_{2}H_{6}$')
+#     ax.plot(t_vec, C_profile[:, 1], label=r'$\rm C_{2}H_{4}$')
+#     ax.plot(t_vec, C_profile[:, 2], label=r'$\rm CH_{4}$')
+#     ax.plot(t_vec, C_profile[:, 3], label=r'$\rm H_{2}$')
+#     ax.plot(t_vec, C_profile[:, 4], label=r'$\rm CO_{2}$')
+#     ax.plot(t_vec, C_profile[:, 5], label=r'$\rm CO$')
+#     ax.plot(t_vec, C_profile[:, 6], label=r'$\rm H_{2}O$')
+#     ax.set_xlabel('t (s)')
+#     ax.set_ylabel('C (mol/L)')
+#     ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+#
+#     fig_name = 'profile'
+#     if title is not None:
+#         ax.set_title(title)
+#         fig_name += ('_' + title.replace(' ', ''))
+#     if save_path is None:
+#         save_path = os.getcwd()
+#
+#     fig.savefig(os.path.join(save_path, fig_name + '.png'), bbox_inches="tight")
+#
+#
+# def plot_ethane_overlap(t_vec1, C_profile1, t_vec2, C_profile2, title=None, save_path=None, opt_flag=False):
+#     """
+#     Plot the ode profiles,
+#     Check whether the first profile matches with the second
+#     """
+#     fig, ax = plt.subplots(figsize=(6, 6))
+#     ax.plot(t_vec1, C_profile1[:, 0], label=r'$\rm C_{2}H_{6}$')
+#     ax.plot(t_vec1, C_profile1[:, 1], label=r'$\rm C_{2}H_{4}$')
+#     ax.plot(t_vec1, C_profile1[:, 2], label=r'$\rm CH_{4}$')
+#     ax.plot(t_vec1, C_profile1[:, 3], label=r'$\rm H_{2}$')
+#     ax.plot(t_vec1, C_profile1[:, 4], label=r'$\rm CO_{2}$')
+#     ax.plot(t_vec1, C_profile1[:, 5], label=r'$\rm CO$')
+#     ax.plot(t_vec1, C_profile1[:, 6], label=r'$\rm H_{2}O$')
+#     # scatter for the second profile
+#     ax.scatter(t_vec2, C_profile2[:, 0], s=35, alpha=0.3)
+#     ax.scatter(t_vec2, C_profile2[:, 1], s=35, alpha=0.3)
+#     ax.scatter(t_vec2, C_profile2[:, 2], s=35, alpha=0.3)
+#     ax.scatter(t_vec2, C_profile2[:, 3], s=35, alpha=0.3)
+#     ax.scatter(t_vec2, C_profile2[:, 4], s=35, alpha=0.3)
+#     ax.scatter(t_vec2, C_profile2[:, 5], s=35, alpha=0.3)
+#     ax.scatter(t_vec2, C_profile2[:, 6], s=35, alpha=0.3)
+#
+#     ax.set_xlabel('t (s)')
+#     ax.set_ylabel('C (mol/L)')
+#     ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+#
+#     fig_name = 'profiles_overlap'
+#     if title is not None:
+#         ax.set_title(title)
+#         fig_name += ('_' + title.replace(' ', ''))
+#     if save_path is None:
+#         save_path = os.getcwd()
+#
+#     fig.savefig(os.path.join(save_path, fig_name + '.png'), bbox_inches="tight")
+#
+#
+# def plot_ethane_residual(t_vec1, C_profile1, t_vec2, C_profile2, title=None, save_path=None):
+#     """
+#     Plot the ode profiles,
+#     Check whether the first profile matches with the second
+#     """
+#     fig, ax = plt.subplots(figsize=(6, 6))
+#     ax.plot(t_vec1, C_profile1[:, 0] - C_profile2[:, 0], label=r'$\rm C_{2}H_{6}$')
+#     ax.plot(t_vec1, C_profile1[:, 1] - C_profile2[:, 1], label=r'$\rm C_{2}H_{4}$')
+#     ax.plot(t_vec1, C_profile1[:, 2] - C_profile2[:, 2], label=r'$\rm CH_{4}$')
+#     ax.plot(t_vec1, C_profile1[:, 3] - C_profile2[:, 3], label=r'$\rm H_{2}$')
+#     ax.plot(t_vec1, C_profile1[:, 4] - C_profile2[:, 4], label=r'$\rm CO_{2}$')
+#     ax.plot(t_vec1, C_profile1[:, 5] - C_profile2[:, 5], label=r'$\rm CO$')
+#     ax.plot(t_vec1, C_profile1[:, 6] - C_profile2[:, 6], label=r'$\rm H_{2}O$')
+#
+#     ax.set_xlabel('t (s)')
+#     ax.set_ylabel('C (mol/L)')
+#     ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+#
+#     fig_name = 'error_residual'
+#     if title is not None:
+#         ax.set_title(title)
+#         fig_name += ('_' + title.replace(' ', ''))
+#     if save_path is None:
+#         save_path = os.getcwd()
+#
+#     fig.savefig(os.path.join(save_path, fig_name + '.png'), bbox_inches="tight")
 
 
 # %% Define the problem
 # Reaction equations:
-# EDH: ethane dehydrogenation: C2H6 -> C2H4 + H2
+# EDH: ethane_dehydrogenation dehydrogenation: C2H6 -> C2H4 + H2
 # Hyd: hydrogenolysis: C2H6 + H2 -> 2CH4
 # RWGS: Reverse water-gas shift: CO2 + H2 -> CO + H2O
 
@@ -231,7 +228,7 @@ def rate_eq(concentrations, para_dict, stoichiometry, name, temperature):
     return rate_value
 
 
-# %% Tests on the ethane system, with no noise
+# %% Tests on the ethane_dehydrogenation system, with no noise
 # Test on whether the rate can be calculated correctly
 rate_EDH = rate_eq(C0, para_ethane, stoichiometry[0], 'EDH', temperature)
 rate_Hyd = rate_eq(C0, para_ethane, stoichiometry[1], 'Hyd', temperature)
@@ -243,7 +240,23 @@ tC_profile = reactor_ethane.get_profile(rate_eq, para_ethane, t_eval=t_eval)
 # Plot the profile
 t_eval = tC_profile[:, 0]
 C_profile = tC_profile[:, 1:]
-plot_ethane(t_eval, C_profile, 'Ground truth', estimator_name)
+legend_labels = [r'$\rm C_{2}H_{6}$',
+                 r'$\rm C_{2}H_{4}$',
+                 r'$\rm CH_{4}$',
+                 r'$\rm H_{2}$',
+                 r'$\rm CO_{2}$',
+                 r'$\rm CO$',
+                 r'$\rm H_{2}O$']
+plot_profile(t_eval,
+             C_profile,
+             legend_labels=legend_labels,
+             xlabel='t (s)',
+             ylabel='C (mol/L)',
+             title='Test truth',
+             save_path=estimator_name,
+             )
+
+sys.exit()
 # Test the model bridge
 # Parse the specifics (reaction conditions) of reactor object into a dictionary
 reactor_i = {}
@@ -307,7 +320,7 @@ plot_ethane_residual(t_opt[0], Y_opt[0], t_eval, C_profile, 'Error Residual', es
 # Print the results
 ut.write_results(estimator_name, start_time, end_time, loss_opt, X_opt, para_ground_truth)
 
-# %% Test on the ethane system, with noise
+# %% Test on the ethane_dehydrogenation system, with noise
 # Add to noise to the concentrations
 estimator_name = 'ethane_rate_constant_noisy'
 ut.clear_cache(estimator_name)
