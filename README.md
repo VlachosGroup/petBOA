@@ -6,8 +6,38 @@ Bayesian optimization implemented by NEXTorch/BOTorch framework.
 Documentation
 -------------
 
-To-Do
+At this point detailed documentation doesn't exist for this project. However, we attempt to describe all the folders 
+that exist in this project, and also give a short summary of each example present. 
 
+### Folder Tree for the main project
+
+    .
+    ├── cache                   # Old python scripts archived for future use. 
+    ├── estimator               # Source files: classes and methods for BO based parameter estimation
+    ├── examples                # All example templates with respective input data and results 
+    ├── tests                   # Some miscellaneous tests. Not automated. 
+    └── README.md
+### Examples folder tree 
+This describes the folder tree for the templates. 
+
+    .
+    ├── batch_reactor_template                           # This is the batch reactor template  
+    │       └── ethane_dehydrogenation
+    │            ├── fit_all_params                      
+    │            │   └── results_fit_all_params
+    │            └── fit_specific_params_only
+    │                └── results_fit_prefactors_only    
+    ├── generalized_rate_expressions                     # Models with generalized rate expressions
+    │       └── ammonia
+    │            ├── ammonia_constant_T_results
+    │            └── ammonia_multiple_T_results
+    ├── PFR_template                                     # PFR model for the ethane dehydorgenation
+    │            └── ethane_dehydrogenation
+    │            └── ethane_PFR_results
+    └── rosenbrock                                       # Generic PE template for a parametrized mdoel  
+        └── rosenbrock-test
+
+More detailed documentation will be added once the source code and examples are finalized. 
 
 Developers
 ----------

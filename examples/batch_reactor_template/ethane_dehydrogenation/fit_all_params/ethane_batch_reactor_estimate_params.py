@@ -9,11 +9,11 @@ from estimator.plots import plot_overlap, plot_residual
 from estimator.optimizer import BOOptimizer
 from estimator.reactor import ModelBridge
 import pandas as pd
-from examples.batch_reactor_template.ethane_dehydrogenation.fit_all_params_multiple_T.ethane_model_load import *
+from examples.batch_reactor_template.ethane_dehydrogenation.fit_all_params.ethane_model_load import *
 
 # Start the parameter estimation problem and set an estimator name
 # Estimator name
-estimator_name = 'ethane_batch_results'
+estimator_name = 'results_fit_all_params'
 ut.clear_cache(estimator_name)
 
 # Load the experimental data from the csv file.
@@ -62,7 +62,7 @@ para_ethane = {'EDH_prefactor': np.log10(A0_EDH),
 para_name_ethane = list(para_ethane.keys())
 
 # parameter bounds that are used for parameter estimation
-deviation = 0.25
+deviation = 0.10
 para_ranges = [[-np.abs(vi) * deviation + vi, np.abs(vi) * deviation + vi] for vi in para_ethane.values()]
 
 # #%% Input experimental data and models (rate expressions) into a model wrapper
@@ -92,10 +92,8 @@ for i, T in enumerate(Kp["EDH"].keys()):
                  title='Optimal Set @ T=' + str(T),
                  legend_labels=legend_labels,
                  save_path=estimator_name)
-print(t_opt[3], Y_opt[3] - Y_experiments[3])
-print(t_opt[3], np.array(Y_opt[3] - Y_experiments[3]).T)
-plot_residual(t_opt[3], Y_opt[3], t_eval, Y_experiments[3],
-              title='Residual @ T=873K',
+    plot_residual(t_opt[i], Y_opt[i], t_eval, Y_experiments[i],
+              title='Residual @ T=' + str(T),
               legend_labels=legend_labels,
               save_path=estimator_name)
 # Print the results
