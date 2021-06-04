@@ -11,7 +11,8 @@ from nextorch import plotting
 
 import estimator.utils as ut
 from estimator.expressions import general_rate
-from estimator.optimizer import ModelBridge, BOOptimizer
+from estimator.optimizer import BOOptimizer
+from estimator.reactor import ModelBridge
 
 # %% Import and process data
 # Set the reaction constants
@@ -54,7 +55,7 @@ for i in range(n_experiments):
 
 # %% Parameter estimation section
 # estimator name 
-estimator_name = 'ammonia_constant_T'
+estimator_name = 'ammonia_constant_T_results'
 
 # Set the number of optimization loops
 n_iter = 50
