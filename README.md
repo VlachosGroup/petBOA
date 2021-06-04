@@ -1,7 +1,7 @@
 # Parameter Estimation - BO
 
 This is an open-source software package to facilitate parameter estimation using 
-Bayersion optimization implemented by NEXTorch/BOTorch framework.
+Bayesian optimization implemented by NEXTorch/BOTorch framework.
 
 Documentation
 -------------
