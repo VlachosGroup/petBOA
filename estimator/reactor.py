@@ -4,8 +4,8 @@ Reactor and numerical integration functions
 import numpy as np
 from scipy.integrate import ode, solve_ivp
 from estimator.utils import WeightedRMSE, para_values_to_dict
-
-
+import timeit
+count = 0
 # # Assume we have
 # # n_rxn reactions and m_spec species
 #
@@ -86,6 +86,8 @@ def ode_solver_ivp(func, y0, t0, tf, t_eval, method, *func_inputs):
     Set up the ode solver 
     Use solve_ivp
     """
+    global count
+    count += 1
     sol = solve_ivp(func, t_span=[t0, tf], y0=y0, method=method, t_eval=t_eval, args=(*func_inputs,))
     # Extract t and C from sol
     t_vec = sol.t
@@ -177,6 +179,8 @@ class ModelBridge:
         self.rate_expression = rate_expression
         self.para_names = para_names
         self.name = name
+        self.call_count = 0
+        self.model_count = count
 
         # other classes
         self.Reactors = None
@@ -264,7 +268,7 @@ class ModelBridge:
                                              species_indices=self.species_indices, t_eval=self.t_eval,
                                              method=self.method)
             Y_predict.append(xf)
-
+        self.model_count = count
         return Y_predict
 
     def exit_concentration(self, xi):
@@ -280,7 +284,7 @@ class ModelBridge:
             Cf_i = Reactor_i.get_exit_concentration(self.rate_expression, para_dict, t_eval=self.t_eval,
                                                     method=self.method)
             Y_predict.append(Cf_i)
-
+        self.model_count = count
         return Y_predict
 
     def profile(self, xi, t_eval=None, return_t_eval=True):
@@ -299,7 +303,7 @@ class ModelBridge:
             tC_profile_i = Reactor_i.get_profile(self.rate_expression, para_dict, t_eval=t_eval, method=self.method)
             t_predict.append(tC_profile_i[:, 0])
             Y_predict.append(tC_profile_i[:, 1:])  # ignore the first column since it's time
-
+        self.model_count = count
         if return_t_eval:
             return t_predict, Y_predict
 
@@ -319,5 +323,5 @@ class ModelBridge:
         for i in range(self.n_reactors):
             # Factor in the weights
             loss += WeightedRMSE(self.Y_groundtruth[i], Y_predict[i], self.Y_weights)
-
+        self.call_count += 1
         return loss
