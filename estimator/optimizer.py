@@ -136,6 +136,7 @@ class BOOptimizer():
                  objective_func,
                  para_ranges,
                  n_iter=100,
+                 n_sample_multiplier=5,
                  make_plot=True,
                  log_flag=False):
         """
@@ -152,7 +153,7 @@ class BOOptimizer():
         n_dim = len(para_ranges_varying)
 
         # Latin hypercube design with 10 initial points
-        n_init = 5 * n_dim
+        n_init = n_sample_multiplier * n_dim
         X_init = doe.latin_hypercube(n_dim=n_dim, n_points=n_init, seed=1)
 
         Y_init = bo.eval_objective_func(X_init, para_ranges_varying, objective_func_vectorized.predict)
