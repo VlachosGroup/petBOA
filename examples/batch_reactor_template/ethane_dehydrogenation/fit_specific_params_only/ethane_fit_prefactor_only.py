@@ -65,7 +65,7 @@ para_name_ethane = list(para_ethane.keys())
 # Note for parameters which should be modified/tuned specify a range
 # For fixed parameters please leave the parameter to use the default single value instead of a range.
 deviation = 0.25
-varying_axes = [0, 3, 6]
+varying_axes = [0, 3, 5]
 para_ranges = []
 # parameter bounds that are used for parameter estimation
 for i, vi in enumerate(para_ethane.values()):

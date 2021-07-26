@@ -54,6 +54,7 @@ def loss_func(self,
     for i in range(self.n_responses):
         # Factor in the weights
         loss += WeightedRMSE(self.y_groundtruth[i], y_predict[i], self.y_weights)
+    self.call_count += 1
     return loss
 
 
@@ -73,11 +74,35 @@ y_response = data[:, -1:].T
 
 # Change the ranges of a and b if you generate new data if using a different a or b
 # these are the bounds within which # parameters are searched
-parameter_range = [[0.0, 5.0],  # for default a
-                   [50.0, 150.0]]  # for default b
+parameter_range = [[0.0, 20.0],  # for default a
+                   [100.0, 300.0]]  # for default b
 para_names = ['a', 'b']
 
 # start a timer
+a = open('debug.log', mode='w')
+# for i in range(1,2):
+#     start_time = time.time()
+#     estimator_name = 'rosenbrock-test'
+#     ModelWrapper.loss_func = loss_func  # Provide loss function handle to the Model Wrapper Class
+#     wrapper = ModelWrapper(model_function=rosenbrock,  # model function used for evaluating responses = f(inputs,params)
+#                            para_names=para_names,
+#                            name=estimator_name,
+#                            )
+#     wrapper.input_data(x_inputs=x_input,
+#                        n_trials=100,
+#                        y_groundtruth=y_response)
+#     optimizer = BOOptimizer(estimator_name)
+#     n_iter = 50
+#     X_opt, loss_opt, Exp = optimizer.optimize(wrapper.loss_func,
+#                                               parameter_range,
+#                                               n_sample_multiplier=int(i),
+#                                               n_iter=n_iter,
+#                                               log_flag=True)
+#     a.write("Objective function called {} times \t".format(wrapper.call_count))
+#     a.write("Parameters are {} \n".format(X_opt))
+#     end_time = time.time()
+#     a.write("Total Time: {} sec \n".format(end_time-start_time))
+
 start_time = time.time()
 estimator_name = 'rosenbrock-test'
 ModelWrapper.loss_func = loss_func  # Provide loss function handle to the Model Wrapper Class
@@ -89,10 +114,14 @@ wrapper.input_data(x_inputs=x_input,
                    n_trials=100,
                    y_groundtruth=y_response)
 optimizer = BOOptimizer(estimator_name)
-n_iter = 300
+n_iter = 50
 X_opt, loss_opt, Exp = optimizer.optimize(wrapper.loss_func,
                                           parameter_range,
-                                          n_iter,
+                                          n_sample_multiplier=5,
+                                          n_iter=n_iter,
                                           log_flag=True)
+a.write("Objective function called {} times \t".format(wrapper.call_count))
+a.write("Parameters are {} \n".format(X_opt))
 end_time = time.time()
+a.write("Total Time: {} sec \n".format(end_time-start_time))
 ut.write_results(estimator_name, start_time, end_time, loss_opt, X_opt)

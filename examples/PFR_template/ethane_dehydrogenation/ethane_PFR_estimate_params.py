@@ -69,11 +69,16 @@ wrapper.input_data(stoichiometry, reactor_run_data,
 #  Start a timer
 print("Starting parameter estimation")
 start_time = time.time()
-n_iter = 100
+n_iter = 50
 optimizer = BOOptimizer(estimator_name)
-X_opt, loss_opt, Exp = optimizer.optimize(wrapper.loss_func, para_ranges, n_iter, log_flag=True)
+X_opt, loss_opt, Exp = optimizer.optimize(wrapper.loss_func,
+                                          para_ranges,
+                                          n_iter=n_iter,
+                                          n_sample_multiplier=3,
+                                          log_flag=True)
 end_time = time.time()
-
+print("Loss Function called {} ".format(wrapper.call_count))
+print("Model Function called {} ".format(wrapper.model_count))
 # #%% Compare the estimated profiles to the ground truth data points
 
 # Optimal parameter values

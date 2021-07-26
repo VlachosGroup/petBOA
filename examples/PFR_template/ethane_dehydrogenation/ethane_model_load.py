@@ -34,7 +34,6 @@ example_path = os.path.abspath(os.getcwd())
 Kp_file_path = os.path.join(example_path, Kp_file)
 Kp_data = pd.read_excel(Kp_file_path)
 
-
 def rate_eq(concentrations, para_dict, stoichiometry, name, temperature):
     """
     Rate equation involve pre-factor, Ea and
