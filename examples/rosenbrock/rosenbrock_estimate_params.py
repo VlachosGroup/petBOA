@@ -74,8 +74,8 @@ y_response = data[:, -1:].T
 
 # Change the ranges of a and b if you generate new data if using a different a or b
 # these are the bounds within which # parameters are searched
-parameter_range = [[0.0, 20.0],  # for default a
-                   [100.0, 300.0]]  # for default b
+parameter_range = [[0.0, 5.0],  # for default a
+                   [50.0, 150.0]]  # for default b
 para_names = ['a', 'b']
 
 # start a timer

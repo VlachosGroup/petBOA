@@ -17,7 +17,7 @@ from rosenbrock_data_generate import generate_data
 # Change x,y,a, b to solve a
 # new generate data for a
 # parameter estimation problem
-generate_new_data = True
+generate_new_data = False
 if (generate_new_data):
     a = 10.0
     b = 200.0
