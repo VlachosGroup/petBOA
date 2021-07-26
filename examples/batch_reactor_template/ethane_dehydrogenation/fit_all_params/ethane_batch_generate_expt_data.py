@@ -45,7 +45,7 @@ H2O_in = 0
 C0 = [C2H6_in, C2H4_in, CH4_in, H2_in, CO2_in, CO_in, H2O_in]
 
 # Integration time
-tf = 10
+tf = 10  # sec
 
 # we can set the integration t_eval (optional)
 n_int = 11

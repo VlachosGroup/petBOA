@@ -9,6 +9,7 @@ from estimator.plots import plot_overlap, plot_residual
 from estimator.optimizer import BOOptimizer
 from estimator.reactor import ModelBridge
 import pandas as pd
+from estimator.utils import WeightedRMSE
 from examples.batch_reactor_template.ethane_dehydrogenation.fit_all_params.ethane_model_load import *
 
 # Start the parameter estimation problem and set an estimator name
@@ -65,16 +66,30 @@ para_name_ethane = list(para_ethane.keys())
 deviation = 0.10
 para_ranges = [[-np.abs(vi) * deviation + vi, np.abs(vi) * deviation + vi] for vi in para_ethane.values()]
 
+
+# # Write the loss function
+def loss_func(self, x):
+    """Generic loss function"""
+    loss = 0
+    y_predict = self.profile(x, return_t_eval=False)
+    for i in range(wrapper.n_reactors):
+        # Factor in the weights
+        loss += WeightedRMSE(self.Y_groundtruth[i], y_predict[i], self.Y_weights)
+    self.call_count += 1
+    return loss
+
+
 # #%% Input experimental data and models (rate expressions) into a model wrapper
+ModelBridge.loss_func = loss_func
 wrapper = ModelBridge(rate_eq, para_name_ethane, name=estimator_name)
 wrapper.input_data(stoichiometry, reactor_run_data,
                    Y_experiments, Y_weights, t_eval, qoi='profile')
-
 # # Set up an optimizer
 # # Start a timer
 start_time = time.time()
 n_iter = 100
 optimizer = BOOptimizer(estimator_name)
+
 X_opt, loss_opt, Exp = optimizer.optimize(wrapper.loss_func, para_ranges, n_iter, log_flag=True)
 end_time = time.time()
 
