@@ -21,6 +21,7 @@ class ModelWrapper:
         self.y_responses = []
         self.y_groundtruth = []
         self.y_weights = []
+        self.call_count = 0
 
     def input_data(self,
                    x_inputs,
