@@ -1,0 +1,13 @@
+
+*.pyc
+*.prof
+examples/batch_reactor_template/ethane_dehydrogenation/fit_all_params/debug-scipy-BFGS.log
+examples/batch_reactor_template/ethane_dehydrogenation/fit_all_params/debug-scipy-NelderMead.log
+examples/rosenbrock/debug-scipy.log
+examples/rosenbrock/debug.log
+.idea/inspectionProfiles/profiles_settings.xml
+.idea/modules.xml
+.idea/misc.xml
+.idea/Parameter-Estimation-BO.iml
+.idea/vcs.xml
+.idea/workspace.xml
