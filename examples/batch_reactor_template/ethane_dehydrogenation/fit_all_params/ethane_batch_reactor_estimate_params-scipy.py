@@ -99,22 +99,22 @@ def loss_func(x, model_wrapper):
 # # Set up an optimizer
 # # Start a timer
 start_time = time.time()
-# res = minimize(loss_func,
-#                x0=init_params,
-#                args=(wrapper,),
-#                method="Nelder-Mead",
-#                options={'xtol': 1e-12,
-#                         'disp': True,
-#                         'maxfev': 5000},
-#                )
 res = minimize(loss_func,
                x0=init_params,
                args=(wrapper,),
-               method="BFGS",
-               options={'ftol': 1e-12,
+               method="Nelder-Mead",
+               options={'xtol': 1e-12,
                         'disp': True,
-                        },
+                        'maxfev': 5000},
                )
+# res = minimize(loss_func,
+#                x0=init_params,
+#                args=(wrapper,),
+#                method="BFGS",
+#                options={'ftol': 1e-12,
+#                         'disp': True,
+#                         },
+#                )
 end_time = time.time()
 a = open("debug-scipy-BFGS.log", 'a')
 a.write("Objective function called {} times \n".format(wrapper.call_count))
