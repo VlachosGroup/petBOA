@@ -98,9 +98,9 @@ class MaskedFunc(VectorizedFunc):
     Wrapper for the objective function with fixed and varying inputs
     """
 
-    def __init__(self, objective_func, para_ranges):
+    def __init__(self, objective_func, para_ranges, kwargs=None):
         super().__init__(objective_func)
-
+        self.kwargs = kwargs
         self.mask = ParameterMask(para_ranges)
 
     def predict(self, X_real):
@@ -114,7 +114,7 @@ class MaskedFunc(VectorizedFunc):
         Y_real = []
         for i, xi in enumerate(X_real):
             xi_full = self.mask.prepare_X(xi)
-            yi = self.objective_func(xi_full)
+            yi = self.objective_func(xi_full, **self.kwargs)
             Y_real.append(yi)
 
         Y_real = np.array(Y_real)
@@ -138,12 +138,13 @@ class BOOptimizer():
                  n_iter=100,
                  n_sample_multiplier=5,
                  make_plot=True,
-                 log_flag=False):
+                 log_flag=False,
+                 **kwargs):
         """
         Train a Bayesian Optimizer
         """
         # Vectorize the objective function
-        objective_func_vectorized = MaskedFunc(objective_func, para_ranges)
+        objective_func_vectorized = MaskedFunc(objective_func, para_ranges, kwargs)
         para_ranges_varying = objective_func_vectorized.mask.para_ranges_varying
 
         # Initialize a BO experiment

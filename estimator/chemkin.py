@@ -2,9 +2,7 @@
 Method to call openmkm's executable to
 run a micro-kinetic model.
 """
-import glob
 import os
-import time
 import shutil
 import subprocess
 from pathlib import Path
@@ -16,14 +14,14 @@ def clean_folder(*args):
             os.remove(name)
 
 
-class OMKM:
+class ChemKIN:
     """ A simple omkm executable handler"""
     kind = "mkm executable"
 
     def __init__(self,
                  exe_path,
                  wd_path,
-                 save_folders=False,
+                 save_folders=True,
                  clean_folder=True,
                  run_args=("reactor.yaml", "thermo.xml"),
                  **kwargs):
@@ -36,33 +34,22 @@ class OMKM:
         else:
             self.slurm_required = False
             self.slurm_file_name = None
-        self.reactor_file = run_args[0]
-        self.thermo_file = run_args[1]
         self.process_instance = None
         self.clean = clean_folder
         self.run_number = 0
 
-    def run(self, exp_no):
+    def run(self):
         os.chdir(self.wd_path)
-        if self.save_folders:
-            if not os.path.exists("run_" + str(exp_no)):
-                os.mkdir("run_" + str(exp_no))
-            os.chdir("run_" + str(exp_no))
-        else:
-            if not os.path.exists("run"):
-                os.mkdir("run")
-            os.chdir("run")
         if self.clean:
-            clean_folder("*.csv", "*.out")
-        shutil.copy(self.wd_path + "\\reactor.yaml", ".")
-        shutil.copy(self.wd_path + "\\thermo_modified.xml", "thermo.xml")
-        tic = time.perf_counter()
+            os.remove("OUT.d")
+            clean_folder("*.csv","*.out")
         self.process_instance = subprocess.run(args=[self.exe_path, self.reactor_file, self.thermo_file],
                                                capture_output=True, text=True,
-                                               )
-        toc = time.perf_counter()
-        print("MKM Run {} Finished in {} seconds".format(self.run_number, toc - tic))
+                                      )
+        print("MKM Run {} Finished".format(self.run_number))
         self.run_number += 1
+        if self.save_folders:
+            self.clone_folder(run_no=self.run_number)
 
     def clone_folder(self, run_no):
         src = self.wd_path
