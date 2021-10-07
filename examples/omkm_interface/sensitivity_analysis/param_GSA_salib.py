@@ -1,10 +1,13 @@
 # coding: utf-8
 import os
 import time
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import pmutt.constants
+from SALib.analyze import sobol
+from SALib.sample import saltelli
 from pmutt import pmutt_list_to_dict
 from pmutt.empirical.nasa import Nasa
 from pmutt.empirical.references import Reference, References
@@ -13,12 +16,9 @@ from pmutt.io.omkm import organize_phases, write_cti
 from pmutt.mixture.cov import PiecewiseCovEffect
 from pmutt.omkm.reaction import BEP, SurfaceReaction
 from pmutt.omkm.units import Units
-from pathlib import Path
 
 from estimator.modelwrappers import ModelWrapper
 from estimator.omkm import OMKM
-from SALib.sample import saltelli
-from SALib.analyze import sobol
 
 
 def edit_yaml(filename, p, t, q):
@@ -253,8 +253,8 @@ def main():
     if not os.path.exists(estimator_name):
         os.mkdir(estimator_name)
     os.chdir(estimator_name)
-    np.savetxt("samples.txt",param_values)
-    np.savetxt("loss.txt",Y)
+    np.savetxt("samples.txt", param_values)
+    np.savetxt("loss.txt", Y)
     si = sobol.analyze(problem, Y)
     print(si['ST'])
     print(si['S1'])

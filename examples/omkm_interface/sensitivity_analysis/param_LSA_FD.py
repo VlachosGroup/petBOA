@@ -212,7 +212,7 @@ def main():
     data = pd.read_csv(filepath_or_buffer="all_data.csv")
     data.rename(columns={"Unnamed: 0": "exp_no"}, inplace=True)
     data.pop("t(s)")
-    data = data[:1]
+    # data = data[:10]
     x_input = data[['pressure(atm)', 'temperature(K)', 'vol_flow_rate(cm3/sec)']].to_numpy()
     y_response = data[['N2_massfrac', 'NH3_massfrac', 'H2_massfrac']].to_numpy()
 
@@ -222,7 +222,7 @@ def main():
     for species in species_data:
         if "RU" not in species['name']:
             spec_names.append(species['name'])
-    spec_names = spec_names[:1]
+    # spec_names = spec_names[:5]
     print(spec_names)
     print("Total number of params {} are checked for sensitivity {}".format(len(spec_names), spec_names))
     estimator_name = 'outputs-norm-lsa-fd'
@@ -234,17 +234,17 @@ def main():
     wrapper.input_data(x_inputs=x_input,
                        n_trials=len(data),
                        y_groundtruth=y_response)
-    h = 1.0
-    x_param = 5.0
+    h = 4.0  # in percentage change for parameter
+    x_param = 1.0 # sensitivity estimated at a perturbation of 1kJ/mol for each param
     dlnf_dlnparam = np.zeros(len(spec_names))
     for i, spec in enumerate(spec_names):
         params = np.zeros(len(spec_names)) + x_param
-        params[i] += h
+        params[i] *= (100.0 + h)/100.0
         f_xplush = wrapper.loss_func(params, lamda=0.00)
-        params[i] -= 2 * h
+        params[i] *= (100.0 - h)/100.0
         f_xminush = wrapper.loss_func(params, lamda=0.00)
         dolnf = np.log(np.abs(f_xplush)) - np.log(np.abs(f_xminush))
-        dolnp = np.log(x_param + h) - np.log(x_param - h)
+        dolnp = np.log(x_param * (100.0 + h)/100.0) - np.log(x_param * (100.0 - h)/100.0)
         if np.isinf(dolnf):
             dlnf_dlnparam[i] = 0.0
         else:
