@@ -22,6 +22,8 @@ class ModelWrapper:
         self.y_groundtruth = []
         self.y_weights = []
         self.call_count = 0
+        self.param_evolution = []
+        self.loss_evolution = []
 
     def input_data(self,
                    x_inputs,
@@ -41,3 +43,6 @@ class ModelWrapper:
             y_weights = np.ones((self.n_trials, self.n_responses))
         # normalize the weights
         self.y_weights = y_weights / np.sum(y_weights)
+
+    def loss_func(self, params, **kwargs):
+        pass
