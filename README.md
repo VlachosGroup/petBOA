@@ -20,23 +20,34 @@ that exist in this project, and also give a short summary of each example presen
 ### Examples folder tree 
 This describes the folder tree for the templates. 
 
-    .
-    ├── batch_reactor_template                           # This is the batch reactor template  
-    │       └── ethane_dehydrogenation
-    │            ├── fit_all_params                      
-    │            │   └── results_fit_all_params
-    │            └── fit_specific_params_only
-    │                └── results_fit_prefactors_only    
-    ├── generalized_rate_expressions                     # Models with generalized rate expressions
-    │       └── ammonia
-    │            ├── ammonia_constant_T_results
-    │            └── ammonia_multiple_T_results
-    ├── PFR_template                                     # PFR model for the ethane dehydorgenation
-    │            └── ethane_dehydrogenation
-    │            └── ethane_PFR_results
-    └── rosenbrock                                       # Generic PE template for a parametrized mdoel  
-        └── rosenbrock-test
-
+```bash
+.
+├── PFR_template                                # PFR model for the ethane dehydrogenation
+│   └── ethane_dehydrogenation
+│       └── ethane_PFR_results
+├── batch_reactor_template                      # This is the batch reactor template
+│   └── ethane_dehydrogenation
+│       ├── fit_all_params
+│       └── fit_specific_params_only
+├── generalized_rate_expressions                # Models with generalized rate expressions
+│   └── ammonia
+│       ├── ammonia_constant_T_results
+│       └── ammonia_multiple_T_results
+├── omkm_interface                              # Workflow for interfacing with OpenMKM
+│   ├── chemkin_thermdat
+│   ├── generate_experimental_data
+│   ├── omkm_input_modify
+│   │     ├── inputs
+│   │     └── outputs
+│   ├── omkm_petbo_run                          # This is the main folder of interest for omkm-pet
+│   │     ├── inputs
+│   │     └── outputs-omkm
+│   └── sensitivity_analysis                    # This has examples for LSA and GSA
+│         ├── GSA
+│         └── LSA
+└── rosenbrock                                  # Generic PE template for a parametrized mdoel
+    └── rosenbrock-test
+```
 More detailed documentation will be added once the source code and examples are finalized. 
 
 Developers
