@@ -186,7 +186,14 @@ def loss_func(self,
         os.chdir(self.model.wd_path)
         edit_yaml(filename="reactor.yaml", p=P, t=T, q=Q)
         self.model.run(i)
-        y_model = pd.read_csv("gas_mass_ss.csv").iloc[1][['N2', 'NH3', 'H2']].to_numpy()
+        try:
+            y_model = pd.read_csv("gas_mass_ss.csv").iloc[1][['N2', 'NH3', 'H2']].to_numpy()
+        except:
+            print("Simulation failed at these Params {} Exp. No. {} Optimization Run {}".
+                  format(params, i, self.call_count))
+            _error = 0.0
+            loss += _error
+            continue
         print(y_model, y_predict)
         _error = alpha * np.sqrt(np.mean((y_model - y_predict) ** 2))
         _reg_error = lamda * np.sqrt(np.mean((params) ** 2))
