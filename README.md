@@ -33,13 +33,18 @@ This describes the folder tree for the templates.
 │   └── ammonia
 │       ├── ammonia_constant_T_results
 │       └── ammonia_multiple_T_results
-├── omkm_interface                              # Workflow for interfacing with OpenMKM 
+├── omkm_interface                              # Workflow for interfacing with OpenMKM
 │   ├── chemkin_thermdat
 │   ├── generate_experimental_data
 │   ├── omkm_input_modify
+│   │     ├── inputs
+│   │     └── outputs
 │   ├── omkm_petbo_run                          # This is the main folder of interest for omkm-pet
+│   │     ├── inputs
+│   │     └── outputs-omkm
 │   └── sensitivity_analysis                    # This has examples for LSA and GSA
-│       └── inputs
+│         ├── GSA
+│         └── LSA
 └── rosenbrock                                  # Generic PE template for a parametrized mdoel
     └── rosenbrock-test
 ```
