@@ -49,7 +49,7 @@ reactor:
     type: "cstr"
     volume: "1.0 cm3"
 simulation:
-    end_time: "50 s"
+    end_time: "100 s"
     init_step: 1.0e-15
     output_format: "csv"
     solver:
@@ -226,7 +226,7 @@ def get_parity(wrapper,
         y_data.append(y_exp)
         y_predict.append(y_model)
         x_data.append([i, P, T, Q])
-        _error = np.sqrt(np.mean((y_model - y_predict) ** 2))
+        _error = np.sqrt(np.mean((y_model - y_exp) ** 2))
         loss += _error
         print("Error {}".format(_error))
     print("Optimum params {} total loss {}".format(params, loss))
@@ -245,7 +245,7 @@ def main():
         wd_path = os.getcwd()
     omkm_instance = OMKM(exe_path=omkm_path,
                          wd_path=wd_path,
-                         save_folders=False,
+                         save_folders=True,
                          )
     a = open('debug.log', mode='w')
     data = pd.read_csv(filepath_or_buffer="all_data.csv")
@@ -284,7 +284,8 @@ def main():
                                               n_sample_multiplier=20,
                                               n_iter=n_iter,
                                               log_flag=True,
-                                              lamda=0.001)
+                                              lamda=0.001,
+                                              alpha=10.0)
     a.write("Objective function called {} times \t".format(wrapper.call_count))
     a.write("Parameters are {} \n".format(X_opt))
     end_time = time.time()
@@ -295,12 +296,11 @@ def main():
     df1 = pd.DataFrame(data=wrapper.loss_evolution,
                        columns=['Run No', 'Loss', 'Reg Loss'],
                        )
-    df1.to_csv("{0}\\loss_history.csv".format(estimator_name))
+    df1.to_csv(os.path.join(wd_path,estimator_name,"loss_history.csv"))
     df2 = pd.DataFrame(data=wrapper.param_evolution,
                        columns=para_ground_truth.keys(),
                        )
-    df2.to_csv("{0}\\param_history.csv".format(estimator_name))
-
+    df2.to_csv(os.path.join(wd_path,estimator_name,"param_history.csv"))
     # Plot the results and parity plots
     x_data, y_data, y_opt = get_parity(wrapper, X_opt)
     legend_labels = [r'$\rm N_{2}$', r'$\rm NH_{3}$', r'$\rm H_{2}$']
