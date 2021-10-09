@@ -1,13 +1,10 @@
 # coding: utf-8
 import os
 import time
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import pmutt.constants
-from SALib.analyze import sobol
-from SALib.sample import saltelli
 from pmutt import pmutt_list_to_dict
 from pmutt.empirical.nasa import Nasa
 from pmutt.empirical.references import Reference, References
@@ -16,6 +13,7 @@ from pmutt.io.omkm import organize_phases, write_cti
 from pmutt.mixture.cov import PiecewiseCovEffect
 from pmutt.omkm.reaction import BEP, SurfaceReaction
 from pmutt.omkm.units import Units
+from pathlib import Path
 
 from estimator.modelwrappers import ModelWrapper
 from estimator.omkm import OMKM
@@ -187,7 +185,7 @@ def loss_func(self,
         self.model.run(i)
         y_model = pd.read_csv("gas_mass_ss.csv").iloc[1][['N2', 'NH3', 'H2']].to_numpy()
         _error = alpha * np.sqrt(np.mean((y_model - y_predict) ** 2))
-        _reg_error = lamda * np.sqrt(np.mean(params ** 2))
+        _reg_error = lamda * np.sqrt(np.mean((params) ** 2))
         reg_loss += _reg_error
         loss += _error + _reg_error
     #  end customization specific to the problem
@@ -214,7 +212,7 @@ def main():
     data = pd.read_csv(filepath_or_buffer="all_data.csv")
     data.rename(columns={"Unnamed: 0": "exp_no"}, inplace=True)
     data.pop("t(s)")
-    data = data[:]
+    # data = data[:10]
     x_input = data[['pressure(atm)', 'temperature(K)', 'vol_flow_rate(cm3/sec)']].to_numpy()
     y_response = data[['N2_massfrac', 'NH3_massfrac', 'H2_massfrac']].to_numpy()
 
@@ -224,10 +222,10 @@ def main():
     for species in species_data:
         if "RU" not in species['name']:
             spec_names.append(species['name'])
+    # spec_names = spec_names[:5]
     print(spec_names)
-    print("Total number of params {} are checked for sensitivity {}".format(len(spec_names),spec_names))
-    parameter_range = [[-20.0, 20.0]] * len(spec_names)
-    estimator_name = 'outputs-gsa-salib'
+    print("Total number of params {} are checked for sensitivity {}".format(len(spec_names), spec_names))
+    estimator_name = 'outputs-norm-lsa-fd'
     ModelWrapper.loss_func = loss_func  # Connect loss function handle to the Model Wrapper Class
     wrapper = ModelWrapper(model_function=omkm_instance,  # openmkm wrapper with the "run" method
                            para_names=spec_names,
@@ -236,38 +234,32 @@ def main():
     wrapper.input_data(x_inputs=x_input,
                        n_trials=len(data),
                        y_groundtruth=y_response)
-    problem = {
-        'num_vars': len(spec_names),
-        'names': spec_names,
-        'bounds': parameter_range
-    }
-
-    param_values = saltelli.sample(problem, 16)
-    print("Total number of sensitivity run samples {}".format(param_values.shape[0]))
-    Y = np.zeros([param_values.shape[0]])
-    for i,X in enumerate(param_values):
-        Y[i] = wrapper.loss_func(params=X,
-                                 lamda=0.000)
-        print("Finished evaluating {} sample {} with loss {}".format(i,X, Y[i]))
-    os.chdir(omkm_instance.wd_path)
+    h = 10.0  # in percentage change for parameter
+    x_param = 1.0 # sensitivity estimated at a perturbation of 1kJ/mol for each param
+    dlnf_dlnparam = np.zeros(len(spec_names))
+    for i, spec in enumerate(spec_names):
+        params = np.zeros(len(spec_names)) + x_param
+        params[i] *= (100.0 + h)/100.0
+        f_xplush = wrapper.loss_func(params, lamda=0.00)
+        params[i] *= (100.0 - h)/100.0
+        f_xminush = wrapper.loss_func(params, lamda=0.00)
+        dolnf = np.log(np.abs(f_xplush)) - np.log(np.abs(f_xminush))
+        dolnp = np.log(x_param * (100.0 + h)/100.0) - np.log(x_param * (100.0 - h)/100.0)
+        if np.isinf(dolnf):
+            dlnf_dlnparam[i] = 0.0
+        else:
+            dlnf_dlnparam[i] = dolnf / dolnp
+        print("i {} species {} f(x+h) {} f(x-h) {} doln(f) {} doln(p) {} LSA(i) {}".
+              format(i, spec, f_xplush, f_xminush, dolnf, dolnp, dlnf_dlnparam[i]))
+    data = {"1st order Grad": pd.Series(data=dlnf_dlnparam,
+                                        index=spec_names),
+            }
+    df = pd.DataFrame(data=data)
+    print(df)
+    os.chdir(wd_path)
     if not os.path.exists(estimator_name):
         os.mkdir(estimator_name)
     os.chdir(estimator_name)
-    np.savetxt("samples.txt", param_values)
-    np.savetxt("loss.txt", Y)
-    si = sobol.analyze(problem, Y)
-    print(si['ST'])
-    print(si['S1'])
-    with open("results.txt", "w") as f:
-        f.write("First Order Sensitivity Indices are:\n {} \n".format(si['S1']))
-        f.write("Total Order Sensitivity Indices are:\n {} \n".format(si['ST']))
-    data = {"ST": pd.Series(data=si['ST'],
-                            index=spec_names),
-            "S1": pd.Series(data=si['S1'],
-                            index=spec_names)}
-
-    df = pd.DataFrame(data=data)
-    print(df)
     df.to_csv('results.csv')
     os.chdir(wd_path)
     for f in ["reactor.yaml", "thermo_modified.xml", "thermo_modified.cti"]:
