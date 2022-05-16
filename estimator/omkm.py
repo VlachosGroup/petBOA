@@ -54,8 +54,8 @@ class OMKM:
             os.chdir("run")
         if self.clean:
             clean_folder("*.csv", "*.out")
-        shutil.copy(os.path.join(self.wd_path, "reactor.yaml"), ".")
-        shutil.copy(os.path.join(self.wd_path, "thermo_modified.xml"), "thermo.xml")
+        shutil.copy(os.path.join(self.wd_path, self.reactor_file), ".")
+        shutil.copy(os.path.join(self.wd_path, self.thermo_file), ".")
         tic = time.perf_counter()
         self.process_instance = subprocess.run(args=[self.exe_path, self.reactor_file, self.thermo_file],
                                                capture_output=True, text=True,
