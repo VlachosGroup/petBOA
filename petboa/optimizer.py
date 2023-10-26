@@ -135,6 +135,7 @@ class BOOptimizer():
     def optimize(self,
                  objective_func,
                  para_ranges,
+                 acq_func="EI",
                  n_iter=100,
                  n_sample_multiplier=5,
                  make_plot=True,
@@ -164,7 +165,7 @@ class BOOptimizer():
         Exp.set_optim_specs(objective_func=objective_func_vectorized.predict, maximize=False)
 
         # Run optimization loops        
-        Exp.run_trials_auto(n_iter)
+        Exp.run_trials_auto(n_iter, acq_func_name=acq_func)
 
         # Extract the optima
         y_opt, X_opt, index_opt = Exp.get_optim()

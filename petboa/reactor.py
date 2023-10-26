@@ -3,49 +3,17 @@ Reactor and numerical integration functions
 """
 import numpy as np
 from scipy.integrate import ode, solve_ivp
-from estimator.utils import WeightedRMSE, para_values_to_dict
+from petboa.utils import RMSE, WeightedRMSE, para_values_to_dict
 import timeit
+
 count = 0
+
+
 # # Assume we have
 # # n_rxn reactions and m_spec species
 #
 # # %% ODE functions for numerical integration
-#
-# # Older version
-# def dcdt_1d(t, concentrations, stoichiometry, rate_expression, para_dict, temperature):
-#     """
-#     Compute the derivatives
-#     """
-#     cur_rate = rate_expression(concentrations, para_dict, temperature)
-#     n_spec = len(stoichiometry)
-#
-#     # dC/dt for each species
-#     cur_dcdt = np.zeros(n_spec)
-#     for i in range(n_spec):
-#         cur_dcdt[i] = stoichiometry[i] * cur_rate
-#
-#     return cur_dcdt
-#
-#
-# def ode_solver(func, y0, t0, tf, *func_inputs):
-#     """
-#     Set up the ode solver
-#     Older ode wrapper in scipy
-#     """
-#     # Construct the ode solver, ode45 with varying step size
-#     ans = []
-#
-#     def get_ans(t, y):
-#         ans.append([t, *y])
-#
-#     solver = ode(func).set_integrator('dopri5', rtol=1e-6, method='bdf')
-#     solver.set_solout(get_ans)
-#     # feed in argumenrs and initial conditions for odes
-#     solver.set_initial_value(y0, t0).set_f_params(*func_inputs)
-#     solver.integrate(tf)
-#     ans = np.array(ans)
-#
-#     return ans
+
 
 def dcdt(t, concentrations, stoichiometry, rate_expressions, para_dict, names=None, temperature=None, *rate_inputs):
     """
@@ -125,7 +93,8 @@ class Reactor():
     def get_profile(self, rate_expressions, para_dict, t_eval=None, method='LSODA'):
         """Numerical integration of the rate expression given the parameters"""
         # print(method)
-        tC_profile = ode_solver_ivp(dcdt, self.C0, self.t0, self.tf, t_eval, method, \
+        tC_profile = ode_solver_ivp(dcdt, self.C0, self.t0,
+                                    self.tf, t_eval, method,
                                     self.stoichiometry,
                                     rate_expressions,
                                     para_dict,
@@ -181,6 +150,8 @@ class ModelBridge:
         self.name = name
         self.call_count = 0
         self.model_count = count
+        self.param_evolution = []
+        self.loss_evolution = []
 
         # other classes
         self.Reactors = None
@@ -321,7 +292,9 @@ class ModelBridge:
             Y_predict = self.exit_concentration(xi)
 
         for i in range(self.n_reactors):
-            # Factor in the weights
-            loss += WeightedRMSE(self.Y_groundtruth[i], Y_predict[i], self.Y_weights)
+            if self.Y_weights is None:
+                loss += RMSE(self.Y_groundtruth[i], Y_predict[i])
+            else: #  Factor in the weights
+                loss += WeightedRMSE(self.Y_groundtruth[i], Y_predict[i], self.Y_weights)
         self.call_count += 1
         return loss

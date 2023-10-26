@@ -1,6 +1,9 @@
 import os
 import matplotlib
+from matplotlib.ticker import AutoMinorLocator
 import matplotlib.pyplot as plt
+import itertools
+import numpy as np
 
 # Set matplotlib default values
 font = {'size': 20}
@@ -46,6 +49,7 @@ def plot_overlap(t_vec1,
                  xlabel='t (s)',
                  ylabel='C (mol/L)',
                  title=None,
+                 fig_name=None,
                  save_path=None):
     """
     Plot the ode profiles,
@@ -60,11 +64,14 @@ def plot_overlap(t_vec1,
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-
-    fig_name = 'profiles_overlap'
     if title is not None:
         ax.set_title(title)
-        fig_name += ('_' + title.replace(' ', ''))
+    if fig_name is None:
+        fig_name = 'profiles_overlap'
+        if title is not None:
+            fig_name = ('_' + title.replace(' ', ''))
+        else:
+            fig_name = "overlap_plot"
     if save_path is None:
         save_path = os.getcwd()
     fig.savefig(os.path.join(save_path, fig_name + '.png'), bbox_inches="tight")
@@ -96,3 +103,33 @@ def plot_residual(t_vec1,
     if save_path is None:
         save_path = os.getcwd()
     fig.savefig(os.path.join(save_path, fig_name + '.png'), bbox_inches="tight")
+
+
+def plot_parity(X_data,
+                Y_data,
+                Y_opt,
+                legend_labels,
+                estimator_name,
+                plot_name='Parity-Plot-MKM'):
+    font = {'size': 15}
+    matplotlib.rc('font', **font)
+    fig, ax = plt.subplots(1, 1, figsize=(5, 5))
+    marker = itertools.cycle(['o', '^', '+', 's', 'p', 'd', 'v'])
+    markers = [next(marker) for i in range(len(legend_labels))]
+    for i in range(len(legend_labels)):
+        ax.scatter(y=np.array(Y_opt).T[i],
+                    x=np.array(Y_data).T[i],
+                    label=legend_labels[i],
+                    marker=markers[i])
+        ax.plot(np.linspace(0, 1),
+                np.linspace(0, 1),
+                color='black')
+    ax.set_xlabel(xlabel="Mole Fractions - Exp.")
+    ax.set_ylabel(ylabel="Mole Fractions - Model")
+    ax.xaxis.set_minor_locator(AutoMinorLocator())
+    ax.yaxis.set_minor_locator(AutoMinorLocator())
+    ax.set_xlim([0.0, 1.0])
+    ax.set_ylim([0.0, 1.0])
+    plt.tight_layout()
+    plt.savefig(estimator_name + '/' + plot_name)
+    

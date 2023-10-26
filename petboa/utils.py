@@ -18,7 +18,8 @@ def WeightedRMSE(yhat, y, weights):
 
 def clear_cache(estimator_name):
     outputPath = os.path.join(os.getcwd(), estimator_name)
-    if os.path.exists(outputPath): shutil.rmtree(outputPath)
+    if os.path.exists(outputPath):
+        shutil.rmtree(outputPath)
     os.mkdir(outputPath)
 
 
