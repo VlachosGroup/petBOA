@@ -1,15 +1,13 @@
 # petBOA
 
-This is an open-source software package to facilitate parameter estimation using 
-Bayesian optimization implemented by the NEXTorch/BOTorch framework.
+petBOA is an open-source open-source Python-based Parameter Estimation Tool utilizing Bayesian Optimization with a unique wrapper interface for gradient-free parameter estimation of expensive black-box kinetic models. We provide examples for Python macrokinetic and microkinetic modeling (MKM) tools, such as OpenMKM. petBOA leverages surrogate Gaussian processes to approximate and minimize the objective function designed for parameter estimation. Bayesian Optimization (BO) is implemented using the open-source NEXTorch/BoTorch toolkit. petBOA employs local and global sensitivity analyses to identify important parameters optimized against experimental data, and leverages pMuTT for consistent kinetic and thermodynamic parameters while perturbing species binding energies within the typical error of conventional DFT exchange-correlation functionals (20-30 kJ/mol).
 
 <img src="petBOA_logo.jpg" alt="petBOA logo" style="height: 250px; width:375px;"/>
 
 Documentation
 -------------
 
-At this point detailed documentation doesn't exist for this project. However, we attempt to describe all the folders 
-that exist in this project, and also give a short summary of each example present. 
+We describe all the folders that exist in this repository and also give a short summary of each example present. More detailed documentation will be added once the source code and examples are finalized. 
 
 ### Folder Tree for the main project
 
@@ -42,13 +40,13 @@ This describes the folder tree for the templates.
 │   ├── petboa_fit_params                      # Fit using petBOA
 │   ├── scipy_fit_params                       # Fit using SciPy
 │   └── sensitivity_analysis                   # Local and Global sensitivity analysis identify sensitive params                    
-└── example_4_12DCA_model                      # OpenMKM Black-box Microkinetic model: CSTR reactor 1,2 DCA (DOI:  )   
+└── example_4_12DCA_model                      # OpenMKM Black-box Microkinetic model: CSTR reactor 1,2 DCA (DOI: https://doi.org/10.1021/acscatal.1c00940)   
     ├── evaluate_DRC_fullmodel                 # Degree of rate-control analysis identify sensitive params                    
     ├── full-model                             # Fit parameters with the full order DCA MKM using petBOA and SciPy's Differential Evolution
     ├── inputs                                    
     └── reduced-model                          # Fit parameters with the reduced order DCA MKM using petBOA
 ```
-More detailed documentation will be added once the source code and examples are finalized. 
+
 
 Developers
 ----------
@@ -77,7 +75,7 @@ Dependencies
 Getting Started
 ---------------
 
-1. It will be a good idea to install all the dependencies in a virtual python enviroment such as [virtualenv](https://virtualenv.pypa.io/en/latest/) or [conda env](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) to make sure you don't corrupt system python.
+1. It is strongly recommended to install petBOA and all the dependencies in a *new* virtual python enviroment such as [virtualenv](https://virtualenv.pypa.io/en/latest/) or [conda env](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) to make sure all the dependency version requirements can be met and existing work is not disrupted.
 2. For instance if you are doing this using conda env these steps should give you the required configuration. 
 ```
 conda create --name petboa python==3.9
@@ -85,11 +83,8 @@ conda activate petboa
 ```
 3. Install petboa and the dependencies simply using pip.
    `pip install petboa`
-4. Install any missing dependencies using pip. Usually installing nextorch should install all other depedencies::
-
-    `pip install nextorch`
-
-5. This step is optional. If pip and git aren't installed in the conda environment:
+4. Install any missing dependencies using pip.
+5. (Optional) If pip and git aren't installed in the conda environment:
 ```
 conda install -c anaconda pip
 conda install -c anaconda git
@@ -98,7 +93,37 @@ conda install -c anaconda git
 ```
 https://github.com/VlachosGroup/petBOA.git
 ```
-7. Run the examples in the examples folder to look at the four parameter estmation templates that we have created. 
+7. Run the examples in the examples folder to look at the four parameter estmation templates that we have created.
+8. For instance, if you have cloned the petBOA repository in your $HOME folder.
+```
+$cd $HOME
+$git clone https://github.com/VlachosGroup/petBOA.git
+Cloning into 'petBOA'...
+remote: Enumerating objects: 1012, done.
+remote: Counting objects: 100% (230/230), done.
+remote: Compressing objects: 100% (191/191), done.
+remote: Total 1012 (delta 56), reused 178 (delta 37), pack-reused 782
+Receiving objects: 100% (1012/1012), 16.89 MiB | 31.78 MiB/s, done.
+Resolving deltas: 100% (324/324), done.
+$cd petBOA 
+$cd examples 
+$cd example_1_rosenbrock 
+$ls
+evaluate_GSA petboa       scipy
+$cd evaluate_GSA 
+$ls
+outputs-gsa-salib rosenbrock_GSA.py
+$conda activate petboa
+(petboa) $python3 rosenbrock_GSA.py 
+Para Bounds: [0, 10] [0, 200]
+Total number of sensitivity run samples 768
+In iteration 1 Loss is 1647.55846 parameters are 9.92 156.59 
+In iteration 2 Loss is 1644.39692 parameters are 9.70 156.59 
+...
+```
+9. Examples 1 and 2 are Python model templates and can be readily used or modified to fit to your purposes.
+10. Examples 3 and 4 are OpenMKM based microkinetic models. Therefore, you need a working version of OpenMKM on you computer. And the OpenMKM executable `omkm` path should be added to the python scripts. Instructions to install OpenMKM can be found at: https://github.com/VlachosGroup/openmkm or https://vlachosgroup.github.io/openmkm/
+11. Please contact us if you have any issues with installation or running the examples. 
 
 License
 -------
