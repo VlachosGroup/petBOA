@@ -13,6 +13,9 @@ var/
 .installed.cfg
 *.egg
 
+.DS_Store
+.gitignore
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
