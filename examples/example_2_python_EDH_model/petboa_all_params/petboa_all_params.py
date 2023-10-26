@@ -138,7 +138,7 @@ for repeat in range(5):
                                               log_flag=True)
     end_time = time.time()
     ut.write_results(estimator_name, start_time, end_time, loss_opt, X_opt)
-    a.write("Objective function called {} times \t".format(wrapper.call_count))
+    a.write("Objective function called {} times \n".format(wrapper.call_count))
     a.write("Parameters are {} \n".format(X_opt))
     a.write("Total Time: {} sec \n".format(end_time - start_time))
     df1 = pd.DataFrame(data=wrapper.loss_evolution,

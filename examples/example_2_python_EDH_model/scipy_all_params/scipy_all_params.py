@@ -17,7 +17,7 @@ import pandas as pd
 import petboa.utils as ut
 from petboa.plots import plot_overlap
 from petboa.reactor import ModelBridge
-from petboa.utils import WeightedRMSE, RMSE
+from petboa.utils import WeightedRMSE, RMSE, parse_param_file
 from ethane_model import stoichiometry, rxn_names, rate_eq, Kp, m_specs
 
 
@@ -74,7 +74,7 @@ for run in expt_runs[:]:
 
 #  Define the kinetic parameters
 #  6 parameters to fit
-#  initial guesses for the parameters
+#  Ground Truth of the parameters
 A0_EDH = 2.5E6
 Ea_EDH = 125  # kJ/mol
 A0_Hyd = 3.8E8
@@ -88,7 +88,20 @@ para_ethane = {'EDH_prefactor': np.log10(A0_EDH),
                'RWGS_prefactor': np.log10(A0_RWGS),
                'RWGS_Ea': Ea_RWGS
                }
-para_name_ethane = list(para_ethane.keys())
+
+para_name_ethane, para_ranges = parse_param_file("params.xlsx")
+
+# Alternatively set it up manually
+# para_name_ethane = list(para_ethane.keys())
+# para_ranges = [[6, 9],  # EDH_prefactor
+#                [50, 200],  # EDH_Ea
+#                [6, 9],  # Hyd_prefactor
+#                [50, 200],  # Hyd_Ea
+#                [6, 9],  # RWGS_prefactor
+#                [50, 200],  # RWGS_Ea
+#                ]
+
+
 if not os.path.exists(estimator_name):
     os.mkdir(estimator_name)
 
@@ -97,15 +110,6 @@ print("Parameter Names {} {} {} {} {} {}".format(*para_name_ethane))
 print("Ground Truth {} {} {} {} {} {}".format(*para_ethane.values()))
 a.write("Parameter Names {} {} {} {} {} {} \n".format(*para_name_ethane))
 a.write("Ground Truth {} {} {} {} {} {} \n".format(*para_ethane.values()))
-
-para_ranges = [[6, 9],  # EDH_prefactor
-               [50, 200],        # EDH_Ea
-               [6, 9],  # Hyd_prefactor
-               [50, 200],        # Hyd_Ea
-               [6, 9],  # RWGS_prefactor
-               [50, 200],        # RWGS_Ea
-               ]
-
 
 param_res = []
 full_df = pd.DataFrame()

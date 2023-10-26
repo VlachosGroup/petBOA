@@ -15,7 +15,7 @@ import petboa.utils as ut
 from petboa.optimizer import BOOptimizer
 from petboa.plots import plot_overlap
 from petboa.reactor import ModelBridge
-from petboa.utils import WeightedRMSE, RMSE
+from petboa.utils import WeightedRMSE, RMSE, parse_param_file
 import numpy as np
 from ethane_model import stoichiometry, rxn_names, rate_eq, Kp, m_specs
 
@@ -53,7 +53,7 @@ Y_experiments = []
 
 Y_weights = np.ones(m_specs)
 # Optionally set the weight for water as zero, others as 1
-# Y_weights[-1] = 0.
+Y_weights[-1] = 0.
 
 tf = 10.0
 # we can set the integration t_eval (optional)
@@ -89,7 +89,19 @@ para_ethane = {'EDH_prefactor': np.log10(A0_EDH),
                'RWGS_Ea': Ea_RWGS
                }
 
-para_name_ethane = list(para_ethane.keys())
+para_name_ethane, para_ranges = parse_param_file("params.xlsx")
+
+# Alternatively set it up manually
+# para_name_ethane = list(para_ethane.keys())
+# para_ranges = [[6, 9],  # EDH_prefactor
+#                [50, 200],  # EDH_Ea
+#                [6, 9],  # Hyd_prefactor
+#                [50, 200],  # Hyd_Ea
+#                [6, 9],  # RWGS_prefactor
+#                [50, 200],  # RWGS_Ea
+#                ]
+
+
 if not os.path.exists(estimator_name):
     os.mkdir(estimator_name)
 
@@ -99,18 +111,10 @@ print("Ground Truth {} {} {} {} {} {}".format(*para_ethane.values()))
 a.write("Parameter Names {} {} {} {} {} {} \n".format(*para_name_ethane))
 a.write("Ground Truth {} {} {} {} {} {} \n".format(*para_ethane.values()))
 
-para_ranges = [[6, 9],  # EDH_prefactor
-               [50, 200],  # EDH_Ea
-               [6, 9],  # Hyd_prefactor
-               [50, 200],  # Hyd_Ea
-               [6, 9],  # RWGS_prefactor
-               [50, 200],  # RWGS_Ea
-               ]
-
 param_res = []
 full_df = pd.DataFrame()
 for repeat in range(5):
-    # #%% Input experimental data and models (rate expressions) into a model wrapper
+    # Input experimental data and models (rate expressions) into a model wrapper
     ModelBridge.loss_func = loss_func
     wrapper = ModelBridge(rate_eq, para_name_ethane, name=estimator_name)
     wrapper.input_data(stoichiometry, reactor_run_data,

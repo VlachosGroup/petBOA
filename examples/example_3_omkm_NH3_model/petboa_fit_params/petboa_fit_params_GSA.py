@@ -13,7 +13,7 @@ import pandas as pd
 from petboa.modelwrappers import ModelWrapper
 from petboa.omkm import OMKM
 from petboa.plots import plot_parity
-from petboa.utils import RMSE
+from petboa.utils import RMSE, parse_param_file
 from petboa.optimizer import BOOptimizer
 
 from make_omkm_inputs import edit_thermo_xml, edit_reactor_yaml, load_thermo_objects, update_param_thermo
@@ -122,17 +122,14 @@ def main():
 
     para_ground_truth = {}
 
-    # Select only the sensitive species from GSA
     # species_to_change = ['N2(T)', 'N(T)', 'H(T)', 'NH3(T)', 'NH2(T)', 'NH(T)',
     #                      'N2(S)', 'N(S)', 'H(S)', 'NH3(S)', 'NH2(S)', 'NH(S)',
     #                      'TS4_N2(T)', 'TS4_N2(S)',
     #                      ]
-    species_to_change = ['N(S)', 'H(S)', 'NH2(S)', 'TS4_N2(S)']
-    max_deviation = 20.0  # kJ/mol
-    parameter_range = []
-    for i in range(len(species_to_change)):
-        para_ground_truth[species_to_change[i]] = 0.0  # kJ/mol
-        parameter_range += [[-1.0 * max_deviation, max_deviation]]
+    # Select only the sensitive species from GSA
+    # species_to_change = ['N(S)', 'H(S)', 'NH2(S)', 'TS4_N2(S)']
+
+    species_to_change, parameter_range = parse_param_file("params_GSA.xlsx")
 
     # You can remove a parameter from fitting by not passing the bounds
     # and just passing a nominal value. Below parameters 1, 2, 3 and not
