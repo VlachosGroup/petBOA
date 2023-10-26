@@ -1,11 +1,9 @@
 # petBOA
 
 This is an open-source software package to facilitate parameter estimation using 
-Bayesian optimization implemented by NEXTorch/BOTorch framework.
+Bayesian optimization implemented by the NEXTorch/BOTorch framework.
 
-.. image:: ./petBOA_logo.jpg
-   :height: 320
-   :width: 540
+<img src="petBOA_logo.jpg" alt="petBOA logo" style="height: 250px; width:375px;"/>
 
 Documentation
 -------------
