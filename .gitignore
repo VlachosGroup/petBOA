@@ -1,13 +1,61 @@
+# Distribution / packaging
+bin/
+build/
+develop-eggs/
+dist/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+.DS_Store
+.gitignore
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+
+# Rope
+.ropeproject
+
+# Django stuff:
+*.log
+*.pot
+
+# Sphinx documentation
+docs/_build/
 
 *.pyc
 *.prof
-examples/batch_reactor_template/ethane_dehydrogenation/fit_all_params/debug-scipy-BFGS.log
-examples/batch_reactor_template/ethane_dehydrogenation/fit_all_params/debug-scipy-NelderMead.log
-examples/rosenbrock/debug-scipy.log
-examples/rosenbrock/debug.log
+*.log
+
+# PyCharm
 .idea/inspectionProfiles/profiles_settings.xml
 .idea/modules.xml
 .idea/misc.xml
 .idea/Parameter-Estimation-BO.iml
 .idea/vcs.xml
 .idea/workspace.xml
+
+# VSCode
+.vscode

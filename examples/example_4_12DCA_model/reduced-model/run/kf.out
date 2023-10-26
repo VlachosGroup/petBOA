@@ -1,0 +1,11 @@
+#Forward rate constants of reactions
+
+1.427648e+11    CH3CH3 + PtCu111(*) <=> CH3CH3*
+7.869938e+10    ClCH2CH2Cl + PtCu111(*) <=> ClCH2CH2Cl*
+1.478055e+11    CH2CH2 + PtCu111(*) <=> CH2CH2*
+5.513695e+20    H2 + 2 PtCu111(*) <=> 2 H*
+1.296557e+20    HCl + 2 PtCu111(*) <=> Cl* + H*
+1.305082e+10    ClCH2CH2Cl* + PtCu111(*) <=> Cl* + ClCH2CH2*
+4.825236e+21    ClCH2CH2* + PtCu111(*) <=> CH2CH2* + Cl*
+4.552074e+09    CH3CH2* + PtCu111(*) <=> CH2CH2* + H*
+2.953547e+15    CH3CH3* + PtCu111(*) <=> CH3CH2* + H*

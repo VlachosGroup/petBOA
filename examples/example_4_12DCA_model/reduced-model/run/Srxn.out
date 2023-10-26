@@ -1,0 +1,11 @@
+#Dimensionless entropies of reactions (S/R) at Reactor & Ref. Pressure (1bar)
+
+-1.605180e+01   -1.645726e+01   CH3CH3 + PtCu111(*) <=> CH3CH3*
+-1.882798e+01   -1.923344e+01   ClCH2CH2Cl + PtCu111(*) <=> ClCH2CH2Cl*
+-2.174193e+01   -2.214739e+01   CH2CH2 + PtCu111(*) <=> CH2CH2*
+-1.576593e+01   -1.617140e+01   H2 + 2 PtCu111(*) <=> 2 H*
+-1.788956e+01   -1.829503e+01   HCl + 2 PtCu111(*) <=> Cl* + H*
+-2.440881e+00   -2.440881e+00   ClCH2CH2Cl* + PtCu111(*) <=> Cl* + ClCH2CH2*
+-1.110207e+00   -1.110207e+00   ClCH2CH2* + PtCu111(*) <=> CH2CH2* + Cl*
+-3.670080e+00   -3.670080e+00   CH3CH2* + PtCu111(*) <=> CH2CH2* + H*
+-4.584898e+00   -4.584898e+00   CH3CH3* + PtCu111(*) <=> CH3CH2* + H*

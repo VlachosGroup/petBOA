@@ -1,3 +1,0 @@
-Paramter estimation takes 0.23 min 
-Final loss 14.483 
-Parameters are [0.         1.         0.         1.93071198] 

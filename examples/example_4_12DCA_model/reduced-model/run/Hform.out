@@ -1,0 +1,20 @@
+#Dimensionless formation enthalpies of species (H/RT) at Reference Pressure of 1 bar
+
+CH3CH3          -963.201
+ClCH2CH2Cl      -895.053
+CH2CH2          -762.461
+H2              -159.239
+HCl             -144.755
+Ar                     0
+CH3CH3*         -967.575
+CH2CH2*         -787.183
+ClCH2CH2Cl*     -918.677
+CH3CH2*         -881.399
+ClCH2CH2*       -843.249
+H*               -91.713
+Cl*             -83.1356
+TS12            -959.863
+TS16            -855.085
+TS47            -893.541
+TS49            -850.952
+PtCu111(*)             0

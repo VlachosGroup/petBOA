@@ -1,7 +1,9 @@
-# Parameter Estimation - BO
+# petBOA
 
 This is an open-source software package to facilitate parameter estimation using 
-Bayesian optimization implemented by NEXTorch/BOTorch framework.
+Bayesian optimization implemented by the NEXTorch/BOTorch framework.
+
+<img src="petBOA_logo.jpg" alt="petBOA logo" style="height: 250px; width:375px;"/>
 
 Documentation
 -------------
@@ -12,41 +14,39 @@ that exist in this project, and also give a short summary of each example presen
 ### Folder Tree for the main project
 
     .
-    ├── cache                   # Old python scripts archived for future use. 
-    ├── estimator               # Source files: classes and methods for BO based parameter estimation
+    ├── petboa                  # Source files: classes and methods for BO based parameter estimation
     ├── examples                # All example templates with respective input data and results 
-    ├── tests                   # Some miscellaneous tests. Not automated. 
+    ├── LICENSE.md
+    ├── setup.py
     └── README.md
+
+    
 ### Examples folder tree 
 This describes the folder tree for the templates. 
 
 ```bash
 .
-├── PFR_template                                # PFR model for the ethane dehydrogenation
-│   └── ethane_dehydrogenation
-│       └── ethane_PFR_results
-├── batch_reactor_template                      # This is the batch reactor template
-│   └── ethane_dehydrogenation
-│       ├── fit_all_params
-│       └── fit_specific_params_only
-├── generalized_rate_expressions                # Models with generalized rate expressions
-│   └── ammonia
-│       ├── ammonia_constant_T_results
-│       └── ammonia_multiple_T_results
-├── omkm_interface                              # Workflow for interfacing with OpenMKM
-│   ├── chemkin_thermdat
-│   ├── generate_experimental_data
-│   ├── omkm_input_modify
-│   │     ├── inputs
-│   │     └── outputs
-│   ├── omkm_petbo_run                          # This is the main folder of interest for omkm-pet
-│   │     ├── inputs
-│   │     └── outputs-omkm
-│   └── sensitivity_analysis                    # This has examples for LSA and GSA
-│         ├── GSA
-│         └── LSA
-└── rosenbrock                                  # Generic PE template for a parametrized mdoel
-    └── rosenbrock-test
+.
+├── example_1_rosenbrock                       # Generic PE template for a parametrized model 
+│   ├── evaluate_GSA                           # Global sensitivity analysis using SALib to identify sensitive params
+│   ├── petboa                                 # Fit parameters using petBOA
+│   └── scipy                                  # Fit parameters using SciPy Nelder-Mead
+├── example_2_python_EDH_model                 # Python Macrokinetic model: Batch Reactor for the ethane dehydrogenation 
+│   ├── evaluate_gsa                           # Global sensitivity analysis using SALib to identify sensitive params
+│   ├── gen_data                               # Generate simulated data used for fitting the macrokinetic model
+│   ├── petboa_all_params                      # Fit parameters using petBOA
+│   ├── petboa_noisy_data                      # Fit parameters with noisy simulated data using petBOA
+│   └── scipy_all_params                       # Fit parameters using SciPy
+├── example_3_omkm_NH3_model                   # OpenMKM Black-box Microkinetic model: CSTR reactor NH3 MKM 
+│   ├── gen_data                               # Generate simulated data
+│   ├── petboa_fit_params                      # Fit using petBOA
+│   ├── scipy_fit_params                       # Fit using SciPy
+│   └── sensitivity_analysis                   # Local and Global sensitivity analysis identify sensitive params                    
+└── example_4_12DCA_model                      # OpenMKM Black-box Microkinetic model: CSTR reactor 1,2 DCA (DOI:  )   
+    ├── evaluate_DRC_fullmodel                 # Degree of rate-control analysis identify sensitive params                    
+    ├── full-model                             # Fit parameters with the full order DCA MKM using petBOA and SciPy's Differential Evolution
+    ├── inputs                                    
+    └── reduced-model                          # Fit parameters with the reduced order DCA MKM using petBOA
 ```
 More detailed documentation will be added once the source code and examples are finalized. 
 
@@ -60,11 +60,11 @@ Developers
 Dependencies
 ------------
 
--  Python >= 3.7
--  `NEXTorch` >=  : Used for implementing the parameter estimation with BO optimization framework
--  `PyTorch` >= 1.8: Used for tensor operations with GPU and autograd support
--  `GPyTorch` >= 1.4: Used for training Gaussian Processes
--  `BoTorch` >= 0.4.0: Used for providing Bayesian Optimization framework
+-  `Python`
+-  `NEXTorch` : Used for implementing the parameter estimation with BO optimization framework
+-  `PyTorch` : Used for tensor operations with GPU and autograd support
+-  `GPyTorch` : Used for training Gaussian Processes
+-  `BoTorch` : Used for providing Bayesian Optimization framework
 -  `Matplotlib`: Used for generating plots
 -  `PyDOE2`: Used for constructing experimental designs
 -  `Numpy`: Used for vector and matrix operations
@@ -77,45 +77,28 @@ Dependencies
 Getting Started
 ---------------
 
-1. Install the dependencies using using pip. Usually installing nextorch should install all other depedencies::
+1. It will be a good idea to install all the dependencies in a virtual python enviroment such as [virtualenv](https://virtualenv.pypa.io/en/latest/) or [conda env](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) to make sure you don't corrupt system python.
+2. For instance if you are doing this using conda env these steps should give you the required configuration. 
+```
+conda create --name petboa python==3.9
+conda activate petboa
+```
+3. Install petboa and the dependencies simply using pip.
+   `pip install petboa`
+4. Install any missing dependencies using pip. Usually installing nextorch should install all other depedencies::
 
     `pip install nextorch`
 
-Note: It will be a good idea to install all the dependencies in a virtual python enviroment such as [virtualenv](https://virtualenv.pypa.io/en/latest/) or [conda env](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) to make sure you don't corrupt system python.
-
-For instance if you are doing this using conda env these steps should give you the required configuration. 
-```
-conda create --name parameterbo python
-conda activate parameterbo
-```
-
-This step is optional. If pip and git aren't installed in the conda environment:
+5. This step is optional. If pip and git aren't installed in the conda environment:
 ```
 conda install -c anaconda pip
 conda install -c anaconda git
 ```
-
-Then inside that virtual environment run:
+6. The examples and the source-code can also be downloaded from GitHub. 
 ```
-pip install nextorch
+https://github.com/VlachosGroup/petBOA.git
 ```
-
-2. (Optional Step) Run the unit tests for nextorch using the instructions at https://nextorch.readthedocs.io/en/latest/ to test the NEXTorch installation. 
-3. We don't have an installer for this package yet, so simply download the source-code and examples using::
-```
-git clone https://github.com/VlachosGroup/Parameter-Estimation-BO.git
-```
-4. Add the `Parameter-Estimation-BO` cloned folder to the `PYTHONPATH`, to be able to call all python modules. 
-    - If you are using and IDE like Pycharm, then adding the `Parameter-Estimation-BO` folder as a new project, will automatically add all the project files to the `PYTHONPATH`, so you can go ahead and run any examples within Pycharm. 
-      Note: Make sure that within Pycharm the python interpreter is changed to the conda virtual env you just created i.e. `parameterbo` in this example. 
-    - If not then you need to manually add the `Parameter-Estimation-BO` folder to your `PYTHONPATH`. For Windows10, you could do this using Environment Variables [see stackoverflow instructions here](https://stackoverflow.com/questions/3701646/how-to-add-to-the-pythonpath-in-windows-so-it-finds-my-modules-packages). Contact Sashank (skasiraj@udel.edu) if you have any further questions.
-    - Alternatively, if you are using anaconda python, you can simply run this command within your active `env`, where the `<directory>` is the `Parameter-Estimation-BO` folder you just cloned.: 
-    - ```
-      conda develop <directory>
-      ``` 
-      Note: You need to do this from one folder above the cloned folder. 
-
-5. Run the examples in the examples folder to look at the four parameter estmation templates that we have created. 
+7. Run the examples in the examples folder to look at the four parameter estmation templates that we have created. 
 
 License
 -------
@@ -149,4 +132,4 @@ Max Cohen - For the ethane dehydrogenation model and several uselful discussions
 
 Publications
 ------------
-
+Aritcle submitted. DOI: To-be-added. 
