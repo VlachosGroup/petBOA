@@ -1,0 +1,9 @@
+CH3CH3 + PtCu111(*) <=> CH3CH3*
+ClCH2CH2Cl + PtCu111(*) <=> ClCH2CH2Cl*
+CH2CH2 + PtCu111(*) <=> CH2CH2*
+H2 + 2 PtCu111(*) <=> 2 H*
+HCl + 2 PtCu111(*) <=> Cl* + H*
+ClCH2CH2Cl* + PtCu111(*) <=> Cl* + ClCH2CH2*
+ClCH2CH2* + PtCu111(*) <=> CH2CH2* + Cl*
+CH3CH2* + PtCu111(*) <=> CH2CH2* + H*
+CH3CH3* + PtCu111(*) <=> CH3CH2* + H*

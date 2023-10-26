@@ -1,0 +1,11 @@
+#Reverse rate constants of reactions
+
+6.646160e+14    CH3CH3 + PtCu111(*) <=> CH3CH3*
+2.564655e+07    ClCH2CH2Cl + PtCu111(*) <=> ClCH2CH2Cl*
+2.962563e+08    CH2CH2 + PtCu111(*) <=> CH2CH2*
+4.793054e+15    H2 + 2 PtCu111(*) <=> 2 H*
+2.564253e+13    HCl + 2 PtCu111(*) <=> Cl* + H*
+6.734162e+07    ClCH2CH2Cl* + PtCu111(*) <=> Cl* + ClCH2CH2*
+2.568321e+10    ClCH2CH2* + PtCu111(*) <=> CH2CH2* + Cl*
+2.182301e+12    CH3CH2* + PtCu111(*) <=> CH2CH2* + H*
+1.140415e+15    CH3CH3* + PtCu111(*) <=> CH3CH2* + H*
