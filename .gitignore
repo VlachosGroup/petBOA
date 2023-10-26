@@ -53,3 +53,6 @@ docs/_build/
 .idea/Parameter-Estimation-BO.iml
 .idea/vcs.xml
 .idea/workspace.xml
+
+# VSCode
+.vscode
