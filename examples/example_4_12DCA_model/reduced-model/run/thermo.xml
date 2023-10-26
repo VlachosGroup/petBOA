@@ -1,0 +1,381 @@
+<?xml version="1.0"?>
+<ctml>
+  <validate species="yes" reactions="yes"/>
+
+  <!-- phase gas     -->
+  <phase id="gas" dim="3">
+    <elementArray datasrc="elements.xml">Cl Ar H C</elementArray>
+    <speciesArray datasrc="#species_data">CH3CH3 ClCH2CH2Cl CH2CH2 H2 HCl Ar</speciesArray>
+    <thermo model="IdealGas"/>
+    <kinetics model="GasKinetics"/>
+    <transport model="None"/>
+  </phase>
+
+  <!-- phase PtCu111     -->
+  <phase id="PtCu111" dim="2">
+    <elementArray datasrc="elements.xml">Cl H C Pt</elementArray>
+    <speciesArray datasrc="#species_data">
+      CH3CH3* CH2CH2* ClCH2CH2Cl* CH3CH2* ClCH2CH2*
+      H* Cl* TS12 TS16 TS47 TS49 PtCu111(*) </speciesArray>
+    <reactionArray datasrc="#reaction_data">
+      <include min="r_0000" max="r_0008"/>
+    </reactionArray>
+    <note>Pt1Cu3 111</note>
+    <thermo model="SurfaceCoverage">
+      <site_density units="mol/cm2">1e-10</site_density>
+    </thermo>
+    <kinetics model="Interface"/>
+    <transport model="None"/>
+    <phaseArray>gas</phaseArray>
+  </phase>
+
+  <!-- species definitions     -->
+  <speciesData id="species_data">
+
+    <!-- species CH3CH3    -->
+    <species name="CH3CH3">
+      <atomArray>C:2.0 H:6.0 </atomArray>
+      <thermo>
+        <Shomate Tmin="100" Tmax="500" P0="100000.0">
+           <floatArray size="7" name="coeffs">
+             5.972800000E+00,   2.038759000E+02,  -9.989500000E+01,   1.933160000E+01, 
+             3.958000000E-01,  -3.729830000E+03,   2.025400000E+02</floatArray>
+        </Shomate>
+      </thermo>
+    </species>
+
+    <!-- species ClCH2CH2Cl    -->
+    <species name="ClCH2CH2Cl">
+      <atomArray>C:2.0 H:4.0 Cl:2.0 </atomArray>
+      <thermo>
+        <Shomate Tmin="100" Tmax="500" P0="100000.0">
+           <floatArray size="7" name="coeffs">
+             1.695740000E+01,   2.456316000E+02,  -1.666432000E+02,   4.548780000E+01, 
+             -2.218000000E-01,  -3.476390000E+03,   2.580600000E+02</floatArray>
+        </Shomate>
+      </thermo>
+    </species>
+
+    <!-- species CH2CH2    -->
+    <species name="CH2CH2">
+      <atomArray>C:2.0 H:4.0 </atomArray>
+      <thermo>
+        <Shomate Tmin="100" Tmax="500" P0="100000.0">
+           <floatArray size="7" name="coeffs">
+             -2.397200000E+00,   1.752570000E+02,  -1.069242000E+02,   2.743150000E+01, 
+             1.386000000E-01,  -2.950280000E+03,   1.751300000E+02</floatArray>
+        </Shomate>
+      </thermo>
+    </species>
+
+    <!-- species H2    -->
+    <species name="H2">
+      <atomArray>H:2.0 </atomArray>
+      <thermo>
+        <Shomate Tmin="100" Tmax="500" P0="100000.0">
+           <floatArray size="7" name="coeffs">
+             3.017270000E+01,  -3.268000000E+00,   2.660200000E+00,   2.111000000E-01, 
+             -3.220000000E-02,  -6.269900000E+02,   1.716100000E+02</floatArray>
+        </Shomate>
+      </thermo>
+    </species>
+
+    <!-- species HCl    -->
+    <species name="HCl">
+      <atomArray>H:1.0 Cl:1.0 </atomArray>
+      <thermo>
+        <Shomate Tmin="100" Tmax="500" P0="100000.0">
+           <floatArray size="7" name="coeffs">
+             3.222630000E+01,  -1.395320000E+01,   2.033530000E+01,  -7.150300000E+00, 
+             -5.100000000E-02,  -5.715600000E+02,   2.328900000E+02</floatArray>
+        </Shomate>
+      </thermo>
+    </species>
+
+    <!-- species Ar    -->
+    <species name="Ar">
+      <atomArray>Ar:1.0 </atomArray>
+      <thermo>
+        <Shomate Tmin="100" Tmax="500" P0="100000.0">
+           <floatArray size="7" name="coeffs">
+             0.000000000E+00,   0.000000000E+00,   0.000000000E+00,   0.000000000E+00, 
+             0.000000000E+00,   0.000000000E+00,   0.000000000E+00</floatArray>
+        </Shomate>
+      </thermo>
+    </species>
+
+    <!-- species CH3CH3*    -->
+    <species name="CH3CH3*">
+      <atomArray>C:2.0 H:6.0 Pt:1.0 </atomArray>
+      <thermo>
+        <Shomate Tmin="100" Tmax="500" P0="100000.0">
+           <floatArray size="7" name="coeffs">
+             -3.345100000E+00,   2.603326000E+02,  -1.517878000E+02,   3.667800000E+01, 
+             5.039000000E-01,  -3.746660000E+03,   3.763000000E+01</floatArray>
+        </Shomate>
+      </thermo>
+    </species>
+
+    <!-- species CH2CH2*    -->
+    <species name="CH2CH2*">
+      <atomArray>C:2.0 H:4.0 Pt:1.0 </atomArray>
+      <thermo>
+        <Shomate Tmin="100" Tmax="500" P0="100000.0">
+           <floatArray size="7" name="coeffs">
+             -1.344000000E-01,   1.989921000E+02,  -1.336846000E+02,   3.722740000E+01, 
+             -4.624000000E-01,  -3.049598760E+03,  -1.712000000E+01</floatArray>
+        </Shomate>
+      </thermo>
+    </species>
+
+    <!-- species ClCH2CH2Cl*    -->
+    <species name="ClCH2CH2Cl*">
+      <atomArray>C:2.0 H:4.0 Cl:2.0 Pt:1.0 </atomArray>
+      <thermo>
+        <Shomate Tmin="100" Tmax="500" P0="100000.0">
+           <floatArray size="7" name="coeffs">
+             2.924810000E+01,   2.579369000E+02,  -1.791956000E+02,   4.994300000E+01, 
+             -2.321000000E-01,  -3.574035090E+03,   1.030800000E+02</floatArray>
+        </Shomate>
+      </thermo>
+    </species>
+
+    <!-- species CH3CH2*    -->
+    <species name="CH3CH2*">
+      <atomArray>C:2.0 H:5.0 Pt:1.0 </atomArray>
+      <thermo>
+        <Shomate Tmin="100" Tmax="500" P0="100000.0">
+           <floatArray size="7" name="coeffs">
+             2.261800000E+00,   2.309509000E+02,  -1.437682000E+02,   3.722230000E+01, 
+             -1.109000000E-01,  -3.415852510E+03,   8.730000000E+00</floatArray>
+        </Shomate>
+      </thermo>
+    </species>
+
+    <!-- species ClCH2CH2*    -->
+    <species name="ClCH2CH2*">
+      <atomArray>C:2.0 H:4.0 Cl:1.0 Pt:1.0 </atomArray>
+      <thermo>
+        <Shomate Tmin="100" Tmax="500" P0="100000.0">
+           <floatArray size="7" name="coeffs">
+             1.911030000E+01,   2.290985000E+02,  -1.567059000E+02,   4.350820000E+01, 
+             -5.147000000E-01,  -3.277066580E+03,   4.030000000E+01</floatArray>
+        </Shomate>
+      </thermo>
+    </species>
+
+    <!-- species H*    -->
+    <species name="H*">
+      <atomArray>H:1.0 Pt:1.0 </atomArray>
+      <thermo>
+        <Shomate Tmin="100" Tmax="500" P0="100000.0">
+           <floatArray size="7" name="coeffs">
+             1.004060000E+01,   1.069500000E+01,   1.089350000E+01,  -9.568100000E+00, 
+             -7.658000000E-01,  -3.608740710E+02,   6.530000000E+00</floatArray>
+        </Shomate>
+      </thermo>
+    </species>
+
+    <!-- species Cl*    -->
+    <species name="Cl*">
+      <atomArray>Cl:1.0 Pt:1.0 </atomArray>
+      <thermo>
+        <Shomate Tmin="100" Tmax="500" P0="100000.0">
+           <floatArray size="7" name="coeffs">
+             1.703930000E+01,   2.514980000E+01,  -2.847900000E+01,   1.091950000E+01, 
+             1.583000000E-01,  -3.295721270E+02,   4.971000000E+01</floatArray>
+        </Shomate>
+      </thermo>
+    </species>
+
+    <!-- species TS12    -->
+    <species name="TS12">
+      <atomArray>C:2.0 H:6.0 Pt:1.0 </atomArray>
+      <thermo>
+        <Shomate Tmin="100" Tmax="500" P0="100000.0">
+           <floatArray size="7" name="coeffs">
+             -7.924000000E+00,   2.485808000E+02,  -1.465991000E+02,   3.560960000E+01, 
+             1.901000000E-01,  -3.714417040E+03,  -1.653000000E+01</floatArray>
+        </Shomate>
+      </thermo>
+    </species>
+
+    <!-- species TS16    -->
+    <species name="TS16">
+      <atomArray>C:2.0 H:5.0 Pt:1.0 </atomArray>
+      <thermo>
+        <Shomate Tmin="100" Tmax="500" P0="100000.0">
+           <floatArray size="7" name="coeffs">
+             -1.816100000E+00,   2.511160000E+02,  -1.737667000E+02,   4.850110000E+01, 
+             -3.104000000E-01,  -3.314365280E+03,  -1.281000000E+01</floatArray>
+        </Shomate>
+      </thermo>
+    </species>
+
+    <!-- species TS47    -->
+    <species name="TS47">
+      <atomArray>C:2.0 H:4.0 Cl:2.0 Pt:1.0 </atomArray>
+      <thermo>
+        <Shomate Tmin="100" Tmax="500" P0="100000.0">
+           <floatArray size="7" name="coeffs">
+             4.552780000E+01,   1.905095000E+02,  -1.249198000E+02,   3.401100000E+01, 
+             -4.893000000E-01,  -3.479715220E+03,   1.284800000E+02</floatArray>
+        </Shomate>
+      </thermo>
+    </species>
+
+    <!-- species TS49    -->
+    <species name="TS49">
+      <atomArray>C:2.0 H:4.0 Cl:1.0 Pt:1.0 </atomArray>
+      <thermo>
+        <Shomate Tmin="100" Tmax="500" P0="100000.0">
+           <floatArray size="7" name="coeffs">
+             2.094610000E+01,   2.085350000E+02,  -1.412729000E+02,   3.933220000E+01, 
+             -4.556000000E-01,  -3.305707310E+03,   5.286000000E+01</floatArray>
+        </Shomate>
+      </thermo>
+    </species>
+
+    <!-- species PtCu111(*)    -->
+    <species name="PtCu111(*)">
+      <atomArray>Pt:1.0 </atomArray>
+      <thermo>
+        <Shomate Tmin="100" Tmax="500" P0="100000.0">
+           <floatArray size="7" name="coeffs">
+             0.000000000E+00,   0.000000000E+00,   0.000000000E+00,   0.000000000E+00, 
+             0.000000000E+00,   0.000000000E+00,   0.000000000E+00</floatArray>
+        </Shomate>
+      </thermo>
+    </species>
+  </speciesData>
+  <reactionData id="reaction_data" motz_wise="false">
+
+    <!-- reaction r_0000    -->
+    <reaction id="r_0000" reversible="yes" type="surface">
+      <equation>CH3CH3 + PtCu111(*) [=] CH3CH3*</equation>
+      <rateCoeff>
+        <Arrhenius type="stick" species="CH3CH3">
+           <A>1.000000E+00</A>
+           <b>0</b>
+           <E units="kcal/mol">0.000000</E>
+        </Arrhenius>
+      </rateCoeff>
+      <reactants>CH3CH3:1.0 PtCu111(*):1</reactants>
+      <products>CH3CH3*:1.0</products>
+    </reaction>
+
+    <!-- reaction r_0001    -->
+    <reaction id="r_0001" reversible="yes" type="surface">
+      <equation>ClCH2CH2Cl + PtCu111(*) [=] ClCH2CH2Cl*</equation>
+      <rateCoeff>
+        <Arrhenius type="stick" species="ClCH2CH2Cl">
+           <A>1.000000E+00</A>
+           <b>0</b>
+           <E units="kcal/mol">0.000000</E>
+        </Arrhenius>
+      </rateCoeff>
+      <reactants>ClCH2CH2Cl:1.0 PtCu111(*):1</reactants>
+      <products>ClCH2CH2Cl*:1.0</products>
+    </reaction>
+
+    <!-- reaction r_0002    -->
+    <reaction id="r_0002" reversible="yes" type="surface">
+      <equation>CH2CH2 + PtCu111(*) [=] CH2CH2*</equation>
+      <rateCoeff>
+        <Arrhenius type="stick" species="CH2CH2">
+           <A>1.000000E+00</A>
+           <b>0</b>
+           <E units="kcal/mol">0.000000</E>
+        </Arrhenius>
+      </rateCoeff>
+      <reactants>CH2CH2:1.0 PtCu111(*):1</reactants>
+      <products>CH2CH2*:1.0</products>
+    </reaction>
+
+    <!-- reaction r_0003    -->
+    <reaction id="r_0003" reversible="yes" type="surface">
+      <equation>H2 + 2 PtCu111(*) [=] 2 H*</equation>
+      <rateCoeff>
+        <Arrhenius type="stick" species="H2">
+           <A>1.000000E+00</A>
+           <b>0</b>
+           <E units="kcal/mol">0.000000</E>
+        </Arrhenius>
+      </rateCoeff>
+      <reactants>H2:1.0 PtCu111(*):2.0</reactants>
+      <products>H*:2.0</products>
+    </reaction>
+
+    <!-- reaction r_0004    -->
+    <reaction id="r_0004" reversible="yes" type="surface">
+      <equation>HCl + 2 PtCu111(*) [=] H* + Cl*</equation>
+      <rateCoeff>
+        <Arrhenius type="stick" species="HCl">
+           <A>1.000000E+00</A>
+           <b>0</b>
+           <E units="kcal/mol">0.000000</E>
+        </Arrhenius>
+      </rateCoeff>
+      <reactants>HCl:1.0 PtCu111(*):2.0</reactants>
+      <products>H*:1.0 Cl*:1</products>
+    </reaction>
+
+    <!-- reaction r_0005    -->
+    <reaction id="r_0005" reversible="yes" type="surface">
+      <equation>ClCH2CH2Cl* + PtCu111(*) [=] ClCH2CH2* + Cl*</equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A>1.041830E+19</A>
+           <b>1</b>
+           <E units="kcal/mol">24.515100</E>
+        </Arrhenius>
+      </rateCoeff>
+      <reactants>ClCH2CH2Cl*:1.0 PtCu111(*):1</reactants>
+      <products>ClCH2CH2*:1.0 Cl*:1</products>
+    </reaction>
+
+    <!-- reaction r_0006    -->
+    <reaction id="r_0006" reversible="yes" type="surface">
+      <equation>ClCH2CH2* + PtCu111(*) [=] CH2CH2* + Cl*</equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A>1.041830E+19</A>
+           <b>1</b>
+           <E units="kcal/mol">0.000000</E>
+        </Arrhenius>
+      </rateCoeff>
+      <reactants>ClCH2CH2*:1.0 PtCu111(*):1</reactants>
+      <products>CH2CH2*:1.0 Cl*:1</products>
+    </reaction>
+
+    <!-- reaction r_0007    -->
+    <reaction id="r_0007" reversible="yes" type="surface">
+      <equation>CH3CH2* + PtCu111(*) [=] CH2CH2* + H*</equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A>1.041830E+19</A>
+           <b>1</b>
+           <E units="kcal/mol">25.484500</E>
+        </Arrhenius>
+      </rateCoeff>
+      <reactants>CH3CH2*:1.0 PtCu111(*):1</reactants>
+      <products>CH2CH2*:1.0 H*:1</products>
+    </reaction>
+
+    <!-- reaction r_0008    -->
+    <reaction id="r_0008" reversible="yes" type="surface">
+      <equation>CH3CH3* + PtCu111(*) [=] CH3CH2* + H*</equation>
+      <rateCoeff>
+        <Arrhenius>
+           <A>1.041830E+19</A>
+           <b>1</b>
+           <E units="kcal/mol">13.167200</E>
+        </Arrhenius>
+      </rateCoeff>
+      <reactants>CH3CH3*:1.0 PtCu111(*):1</reactants>
+      <products>CH3CH2*:1.0 H*:1</products>
+    </reaction>
+  </reactionData>
+  <interactionData id="interaction_data"/>
+  <bepData id="bep_data"/>
+</ctml>

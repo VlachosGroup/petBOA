@@ -1,0 +1,11 @@
+#Equilibrium constants of reactions
+
+2.148080e-04    CH3CH3 + PtCu111(*) <=> CH3CH3*
+3.068615e+03    ClCH2CH2Cl + PtCu111(*) <=> ClCH2CH2Cl*
+4.989109e+02    CH2CH2 + PtCu111(*) <=> CH2CH2*
+1.150351e+05    H2 + 2 PtCu111(*) <=> 2 H*
+5.056276e+06    HCl + 2 PtCu111(*) <=> Cl* + H*
+1.938002e+02    ClCH2CH2Cl* + PtCu111(*) <=> Cl* + ClCH2CH2*
+1.878751e+11    ClCH2CH2* + PtCu111(*) <=> CH2CH2* + Cl*
+2.085906e-03    CH3CH2* + PtCu111(*) <=> CH2CH2* + H*
+2.589888e+00    CH3CH3* + PtCu111(*) <=> CH3CH2* + H*

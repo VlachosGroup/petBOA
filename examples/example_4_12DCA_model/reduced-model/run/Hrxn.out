@@ -1,0 +1,11 @@
+#Dimensionless enthalpies of reactions (H/RT) at Reference Pressure 1bar
+
+-4.373781e+00   CH3CH3 + PtCu111(*) <=> CH3CH3*
+-2.362471e+01   ClCH2CH2Cl + PtCu111(*) <=> ClCH2CH2Cl*
+-2.472210e+01   CH2CH2 + PtCu111(*) <=> CH2CH2*
+-2.418668e+01   H2 + 2 PtCu111(*) <=> 2 H*
+-3.009345e+01   HCl + 2 PtCu111(*) <=> Cl* + H*
+-7.707709e+00   ClCH2CH2Cl* + PtCu111(*) <=> Cl* + ClCH2CH2*
+-2.706925e+01   ClCH2CH2* + PtCu111(*) <=> CH2CH2* + Cl*
+2.502472e+00    CH3CH2* + PtCu111(*) <=> CH2CH2* + H*
+-5.536512e+00   CH3CH3* + PtCu111(*) <=> CH3CH2* + H*
