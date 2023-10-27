@@ -1,6 +1,6 @@
 # petBOA
 
-petBOA is an open-source open-source Python-based Parameter Estimation Tool utilizing Bayesian Optimization with a unique wrapper interface for gradient-free parameter estimation of expensive black-box kinetic models. We provide examples for Python macrokinetic and microkinetic modeling (MKM) tools, such as OpenMKM. petBOA leverages surrogate Gaussian processes to approximate and minimize the objective function designed for parameter estimation. Bayesian Optimization (BO) is implemented using the open-source NEXTorch/BoTorch toolkit. petBOA employs local and global sensitivity analyses to identify important parameters optimized against experimental data, and leverages pMuTT for consistent kinetic and thermodynamic parameters while perturbing species binding energies within the typical error of conventional DFT exchange-correlation functionals (20-30 kJ/mol).
+petBOA is an open-source Python-based Parameter Estimation Tool utilizing Bayesian Optimization with a unique wrapper interface for gradient-free parameter estimation of expensive black-box kinetic models. We provide examples for Python macrokinetic and microkinetic modeling (MKM) tools, such as OpenMKM. petBOA leverages surrogate Gaussian processes to approximate and minimize the objective function designed for parameter estimation. Bayesian Optimization (BO) is implemented using the open-source NEXTorch/BoTorch toolkit. petBOA employs local and global sensitivity analyses to identify important parameters optimized against experimental data, and leverages pMuTT for consistent kinetic and thermodynamic parameters while perturbing species binding energies within the typical error of conventional DFT exchange-correlation functionals (20-30 kJ/mol).
 
 <img src="petBOA_logo.jpg" alt="petBOA logo" style="height: 250px; width:375px;"/>
 
@@ -93,7 +93,7 @@ conda install -c anaconda git
 ```
 https://github.com/VlachosGroup/petBOA.git
 ```
-7. Run the examples in the examples folder to look at the four parameter estmation templates that we have created.
+7. Run the examples in the examples folder to look at the four parameter estimation templates that we have created.
 8. For instance, if you have cloned the petBOA repository in your $HOME folder.
 ```
 $cd $HOME
@@ -122,7 +122,7 @@ In iteration 2 Loss is 1644.39692 parameters are 9.70 156.59
 ...
 ```
 9. Examples 1 and 2 are Python model templates and can be readily used or modified to fit to your purposes.
-10. Examples 3 and 4 are OpenMKM based microkinetic models. Therefore, you need a working version of OpenMKM on you computer. And the OpenMKM executable `omkm` path should be added to the python scripts. Instructions to install OpenMKM can be found at: https://github.com/VlachosGroup/openmkm or https://vlachosgroup.github.io/openmkm/
+10. Examples 3 and 4 are OpenMKM based microkinetic models. Therefore, you need a working version of OpenMKM on you computer. And the OpenMKM executable `omkm` path should be added to the python scripts. Instructions to install OpenMKM can be found at: https://github.com/VlachosGroup/openmkm or https://vlachosgroup.github.io/openmkm/ 
 11. Please contact us if you have any issues with installation or running the examples. 
 
 License
@@ -157,4 +157,5 @@ Max Cohen - For the ethane dehydrogenation model and several uselful discussions
 
 Publications
 ------------
-Aritcle submitted. DOI: To-be-added. 
+
+Article submitted. DOI: To-be-added. 

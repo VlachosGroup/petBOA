@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 	
 setup(
     name="petboa",
-    version="0.1.1",
+    version="0.1.0",
     description="Parameter Estimation using Bayesian Optimization",
     author="Sashank Kasiraju; Vlachos Group",
     author_email="skasiraj@udel.edu",
