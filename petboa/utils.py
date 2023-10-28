@@ -7,6 +7,7 @@ import shutil
 import pandas as pd
 from pmutt.io.excel import read_excel
 
+
 # Loss functions
 # reference: https://ml-cheatsheet.readthedocs.io/en/latest/loss_functions.html
 def RMSE(yhat, y):
@@ -51,24 +52,25 @@ def para_values_to_dict(xi, para_names):
 
 
 def parse_param_file(file_path):
+    try:
+        # Attempt to read as an Excel file
+        excel_data = read_excel(file_path,
+                                skiprows=0,
+                                header=0,
+                                )
+        bounds = get_param_bounds(excel_data)
+        names = get_param_names(excel_data)
+    except ValueError:
         try:
-            # Attempt to read as an Excel file
-            excel_data = read_excel(file_path,
-                                    skiprows=0,
-                                    header=0,
-                                    )
-            bounds = get_param_bounds(excel_data)
-            names = get_param_names(excel_data)
-        except ValueError:
-            try:
-                # Attempt to read as a CSV file
-                csv_data = pd.read_csv(file_path)
-                print(csv_data)
-                bounds = get_param_bounds(csv_data)
-                names = get_param_names(csv_data)
-            except pd.errors.EmptyDataError:
-                return None  # The file is empty or could not be read
-        return names, bounds
+            # Attempt to read as a CSV file
+            csv_data = pd.read_csv(file_path)
+            print(csv_data)
+            bounds = get_param_bounds(csv_data)
+            names = get_param_names(csv_data)
+        except pd.errors.EmptyDataError:
+            return None  # The file is empty or could not be read
+    return names, bounds
+
 
 def get_param_bounds(data):
     bounds = []
@@ -81,6 +83,7 @@ def get_param_bounds(data):
         except:
             return None
     return bounds
+
 
 def get_param_names(data):
     names = []
