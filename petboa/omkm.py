@@ -99,24 +99,21 @@ class OMKM:
                                    "Please make sure the correct path "
                                    "to the `omkm` executable is specified".format(self.exe_path))
         if self.docker is not None:
+            if self.save_folders:
+                d = "run_" + str(exp_no)
+            else:
+                d = "run"
+            working_dir = os.path.join('/data', d)  # Replace with the desired working directory
+            command = ['omkm', self.reactor_file, self.thermo_file]
+            tic = time.perf_counter()
+            container = self.docker
+            exec_command = container.exec_run(command, tty=True,
+                                              workdir=working_dir)
+            self.docker_exec_code = exec_command.exit_code
+            toc = time.perf_counter()
             if self.verbose:
-                print("Attempting to run OpenMKM using Docker")
-            try:
-
-                if self.save_folders:
-                    d = "run_" + str(exp_no)
-                else:
-                    d = "run"
-                working_dir = os.path.join('/data', d)  # Replace with the desired working directory
-
-                command = ['omkm', self.reactor_file, self.thermo_file]
-                container = self.docker
-                exec_command = container.exec_run(command, tty=True,
-                                                  workdir=working_dir)
-                self.docker_exec_code = exec_command.exit_code
-            except:
-                raise RuntimeError("Either the Docker daemon isn't running or the Docker"
-                                   "container is not properly setup")
+                print("MKM Run {} Finished in {} seconds".format(self.run_number, toc - tic))
+            self.run_number += 1
 
     def clone_folder(self, run_no):
         src = self.wd_path
