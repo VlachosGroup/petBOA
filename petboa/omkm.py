@@ -3,9 +3,9 @@ Method to call openmkm's executable to
 run a micro-kinetic model.
 """
 import os
-import time
 import shutil
 import subprocess
+import time
 from pathlib import Path
 
 
@@ -28,6 +28,8 @@ class OMKM:
                  verbose=True,
                  docker=None,
                  **kwargs):
+        self.stderr = None
+        self.stdout = None
         self.exe_path = exe_path
         self.wd_path = wd_path
         self.save_folders = save_folders
@@ -91,6 +93,8 @@ class OMKM:
                 if self.verbose:
                     print("MKM Run {} Finished in {} seconds".format(self.run_number, toc - tic))
                 self.run_number += 1
+                self.stdout = self.process_instance.stdout
+                self.stderr = self.process_instance.stderr
             else:
                 raise RuntimeError("Either the path: {} \n"
                                    "is invalid "
@@ -103,13 +107,15 @@ class OMKM:
                 d = "run_" + str(exp_no)
             else:
                 d = "run"
-            working_dir = os.path.join('/data', d)  # Replace with the desired working directory
+            working_dir = "/data/{}".format(d)  # Replace with the desired working directory
             command = ['omkm', self.reactor_file, self.thermo_file]
             tic = time.perf_counter()
             container = self.docker
             exec_command = container.exec_run(command, tty=True,
                                               workdir=working_dir)
             self.docker_exec_code = exec_command.exit_code
+            self.stdout = exec_command.output
+            self.stderr = exec_command.output
             toc = time.perf_counter()
             if self.verbose:
                 print("MKM Run {} Finished in {} seconds".format(self.run_number, toc - tic))
