@@ -18,7 +18,8 @@ setup(
         "botorch<=0.6.6",
         "nextorch>=0.1.0",
         "pmutt",
-	"SALib"
+        "docker",
+        "SALib"
     ],
     classifiers=[
 		"License :: OSI Approved :: MIT License",

@@ -15,6 +15,7 @@ var/
 
 .DS_Store
 .gitignore
+.idea/
 
 # Installer logs
 pip-log.txt

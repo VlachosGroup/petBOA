@@ -39,7 +39,8 @@ This describes the folder tree for the templates.
 │   ├── gen_data                               # Generate simulated data
 │   ├── petboa_fit_params                      # Fit using petBOA
 │   ├── scipy_fit_params                       # Fit using SciPy
-│   └── sensitivity_analysis                   # Local and Global sensitivity analysis identify sensitive params                    
+│   ├── sensitivity_analysis                   # Local and Global sensitivity analysis identify sensitive params  
+│   └── petboa_with_docker                     # Example to run OpenMKM using Docker SDK for Python
 └── example_4_12DCA_model                      # OpenMKM Black-box Microkinetic model: CSTR reactor 1,2 DCA (DOI: https://doi.org/10.1021/acscatal.1c00940)   
     ├── evaluate_DRC_fullmodel                 # Degree of rate-control analysis identify sensitive params                    
     ├── full-model                             # Fit parameters with the full order DCA MKM using petBOA and SciPy's Differential Evolution
@@ -93,7 +94,7 @@ conda install -c anaconda git
 ```
 https://github.com/VlachosGroup/petBOA.git
 ```
-7. Run the examples in the examples folder to look at the four parameter estimation templates that we have created.
+7. Run the examples in the example folder to look at the four parameter estimation templates that we have created.
 8. For instance, if you have cloned the petBOA repository in your $HOME folder.
 ```
 $cd $HOME
@@ -121,9 +122,20 @@ In iteration 1 Loss is 1647.55846 parameters are 9.92 156.59
 In iteration 2 Loss is 1644.39692 parameters are 9.70 156.59 
 ...
 ```
-9. Examples 1 and 2 are Python model templates and can be readily used or modified to fit to your purposes.
-10. Examples 3 and 4 are OpenMKM based microkinetic models. Therefore, you need a working version of OpenMKM on you computer. And the OpenMKM executable `omkm` path should be added to the python scripts. Instructions to install OpenMKM can be found at: https://github.com/VlachosGroup/openmkm or https://vlachosgroup.github.io/openmkm/ 
-11. Please contact us if you have any issues with installation or running the examples. 
+9. Every example folder has the Python script necessary to run the example, additional input files, and example output files. 
+   1. Note: Please run the Python scripts from their original location in the example folder. 
+   2. Note: Examples use relative paths to load input data or models. 
+10. Examples 1 and 2 are Python model templates and can be directly used or modified to fit to your purposes.
+11. Examples 3 and 4 use OpenMKM based microkinetic models. Therefore, a working version of OpenMKM is necessary to run them.
+    1. Instructions to install OpenMKM can be found at: https://github.com/VlachosGroup/openmkm or https://vlachosgroup.github.io/openmkm/
+    2. In the example Python scripts, the path to the OpenMKM executable `omkm` path should be modified to suit your system configuration.  
+12. If an OpenMKM executable is not present on the machine, then a Docker container for OpenMKM could be used instead.
+    1. First install Docker or Docker Desktop directly using instructions from Docker website: https://www.docker.com/get-started/
+    2. Make sure the Docker service is started and running before running the petBOA example. 
+    3. petBOA uses Docker SDK for Python: https://docker-py.readthedocs.io/en/stable/# to launch and run Docker containers. 
+    4. See Example 3: petboa_with_docker for more details. 
+    5. Note: In Linux, running Docker requires sudo/admin privileges. Please consult Docker documentation to run Docker from Python in linux. https://docs.docker.com/engine/install/linux-postinstall/ 
+13. Please contact us if you have any issues with installation or running the examples. 
 
 License
 -------
@@ -158,4 +170,5 @@ Max Cohen - For the ethane dehydrogenation model and several uselful discussions
 Publications
 ------------
 
-Article submitted. DOI: To-be-added. 
+Article submitted. 
+DOI: To-be-added. 

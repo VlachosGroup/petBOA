@@ -4,7 +4,6 @@ Reactor and numerical integration functions
 import numpy as np
 from scipy.integrate import ode, solve_ivp
 from petboa.utils import RMSE, WeightedRMSE, para_values_to_dict
-import timeit
 
 count = 0
 
