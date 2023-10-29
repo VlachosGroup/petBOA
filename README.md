@@ -39,7 +39,7 @@ This describes the folder tree for the templates.
 │   ├── gen_data                               # Generate simulated data
 │   ├── petboa_fit_params                      # Fit using petBOA
 │   ├── scipy_fit_params                       # Fit using SciPy
-│   └── sensitivity_analysis                   # Local and Global sensitivity analysis identify sensitive params  
+│   ├── sensitivity_analysis                   # Local and Global sensitivity analysis identify sensitive params  
 │   └── petboa_with_docker                     # Example to run OpenMKM using Docker SDK for Python
 └── example_4_12DCA_model                      # OpenMKM Black-box Microkinetic model: CSTR reactor 1,2 DCA (DOI: https://doi.org/10.1021/acscatal.1c00940)   
     ├── evaluate_DRC_fullmodel                 # Degree of rate-control analysis identify sensitive params                    
