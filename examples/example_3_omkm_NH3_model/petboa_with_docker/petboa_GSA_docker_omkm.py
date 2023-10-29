@@ -78,7 +78,6 @@ def loss_func(self,
             print("OpenMKM or Docker not configured correctly")
 
         if not code == 0:
-            print(self.model.stdout)
             print("Model {} Failed \n {}".format(i, self.model.stderr))
             _error += 1.0E10
             _e.append(_error)
@@ -87,7 +86,6 @@ def loss_func(self,
             print(params)
             shutil.copy('thermo.xml', '../thermo_' + str(self.model.run_number) + '.xml')
         else:
-            print(self.model.stdout)
             y_model = pd.read_csv("gas_mass_ss.csv").iloc[1][['N2', 'NH3', 'H2']].to_numpy()
             y_data.append(y_exp)
             y_predict.append(y_model)
