@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
-	
+
 setup(
     name="petboa",
-    version="0.1.0",
+    version="0.1.1",
     description="Parameter Estimation using Bayesian Optimization",
     author="Sashank Kasiraju; Vlachos Group",
     author_email="skasiraj@udel.edu",
@@ -22,9 +22,9 @@ setup(
         "SALib"
     ],
     classifiers=[
-		"License :: OSI Approved :: MIT License",
-		"Operating System :: OS Independent",
-		"Intended Audience :: Science/Research",
-		"Topic :: Scientific/Engineering :: Chemistry",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+        "Intended Audience :: Science/Research",
+        "Topic :: Scientific/Engineering :: Chemistry",
     ],
 )
