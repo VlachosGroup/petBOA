@@ -11,7 +11,6 @@ We describe the sub-folders in the *Example 4* which demonstrates the use of pet
 │   ├── DRC_full_model.py
 │   └── make_omkm_inputs.py
 ├── full-model
-│   ├── diffevo_after_DRC
 │   ├── diffevo_after_DRC.py
 │   ├── make_omkm_inputs.py
 │   ├── petboa_afterDRC.py
