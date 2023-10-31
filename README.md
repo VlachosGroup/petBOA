@@ -7,7 +7,7 @@ petBOA is an open-source Python-based Parameter Estimation Tool utilizing Bayesi
 Documentation
 -------------
 
-We describe all the folders that exist in this repository and also give a short summary of each example present. More detailed documentation will be added once the source code and examples are finalized. 
+We describe all the folders that exist in this repository and also give a short summary of each example present. 
 
 ### Folder Tree for the main project
 
