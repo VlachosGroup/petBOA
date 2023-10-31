@@ -72,7 +72,8 @@ def loss_func(self,
 
 def main():
     # Define the path to the OpenMKM (omkm) executable
-    omkm_path = "/Users/skasiraj/software/openmkm/bin/omkm"
+    # omkm_path = "/Users/<username>/software/openmkm/bin/omkm"
+    omkm_path = "<path to openmkm>"  # Include the path to OpenMKM on the computer
     cwd = os.getcwd()
     omkm_instance = OMKM(exe_path=omkm_path,
                          wd_path=cwd,

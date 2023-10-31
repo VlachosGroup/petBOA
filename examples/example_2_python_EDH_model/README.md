@@ -3,7 +3,7 @@ Documentation
 
 We describe the sub-folders in the *Example 2* which demonstrates the use of petBOA for a Python macrokinetic model. 
 
-### Folder Tree for Example 1
+### Folder Tree for Example 2
 
 ```
 .

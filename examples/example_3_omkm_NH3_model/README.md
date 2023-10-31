@@ -37,7 +37,7 @@ Note: In all the sub-folders the `all_data.csv` contains the simulated data whic
 
 Note: In all the sub-folders the Excel file `params**.xlsx` contains the model parameter names and the bounds used by the parameter estimation scripts. 
 
-Note: Running examples with OpenMKM models require OpenMKM installed on the computer. The scripts have to be modified to include the path to OpenMKM. 
+Note: Running examples with OpenMKM models requires OpenMKM installed on the computer. The Python scripts have to be modified to include the path to OpenMKM. 
 
 1. The `gen_data` folder contains the scripts and input files required to generate simulated data used for parameter estimation. Note: To run the example parameter estimation scripts existing data can be used i.e., no scripts have to be run.
 2. To estimate parameters using petBOA after getting insights from global-sensitivity (GSA) (see the journal article example 3 for more info) run the `petboa_fit_params_GSA.py` in the folder `petboa_fit_params`. Similarly, the example can be repeated for the partial equilibrium index (PEI) based parameters using `petboa_fit_params_PEI.py`

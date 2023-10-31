@@ -1,7 +1,7 @@
 Documentation
 -------------
 
-We describe the sub-folders in the *Example 3* which demonstrates the use of petBOA for an OpenMKM microkinetic model based on the article DOI: 
+We describe the sub-folders in the *Example 4* which demonstrates the use of petBOA for an OpenMKM microkinetic model based on the article DOI: https://doi.org/10.1021/acscatal.1c00940
 
 ### Folder Tree for Example 4
 
@@ -26,9 +26,14 @@ We describe the sub-folders in the *Example 3* which demonstrates the use of pet
 ```
 
 Note: In all the sub-folders the Python script `make_omkm_inputs.py` contains the Python model which is used to make OpenMKM input files. Users don't need to run it, it is automatically imported and used by all other scripts. 
+
 Note: The inputs folders contains the 'all_data.csv file and other input files required to run OpenMKM. Scripts automatically use it using relative paths, as long as they are run from thier original location.  
+
+Note: Running examples with OpenMKM models requires OpenMKM installed on the computer. The Python scripts have to be modified to include the path to OpenMKM. 
+
 
 1. To run the degree of rate control (DRC) analysis for the full-order MKM navigate ot the `evaluate_DRC_fullmodel` folder and run the python script `DRC_full_model.py`. 
 2. To estimate parameters using petBOA for the full-order model after getting insights from global-sensitivity (DRC) (see the journal article example 4 for more info) run the `petboa_afterDRC.py` in the folder `full-model`.
-3. Similarly, the example can be repeated for SciPy's differential evolution using `diffevo_after_DRC.py`
+3. Similarly, the analysis can be repeated for SciPy's differential evolution optimizer using `diffevo_after_DRC.py`
 4. For the reduced-order model run the script `petboa_reduced_model.py` instead in the folder `reduced-model`.
+
